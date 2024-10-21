@@ -2,13 +2,10 @@
 
 import * as React from "react"
 
-import Image from 'next/image';
-
 import * as Icons from "lucide-react"
 import * as Collapsible from "@/components/ui/collapsible"
 import * as Dropdown from "@/components/ui/dropdown-menu"
 import * as Sidebar from "@/components/ui/sidebar"
-import { Command } from "@/components/ui/command";
 
 import { SettingsDialog } from "@/components/home/settings-dialog";
 
@@ -16,27 +13,27 @@ const RSDK_EngineList = [
     {
         title: "RSDKv2",
         url: "#",
-        icon: Icons.Inbox,
+        icon: "./assets/RSDKGeneric.png",
     },
     {
         title: "RSDKv3",
         url: "#",
-        icon: Icons.Inbox,
+        icon: "./assets/RSDKv3.png",
     },
     {
         title: "RSDKv4",
         url: "#",
-        icon: Icons.Inbox,
+        icon: "./assets/RSDKv4.png",
     },
     {
         title: "RSDKv5",
         url: "#",
-        icon: Icons.Inbox,
+        icon: "./assets/RSDKv5.png",
     },
     {
         title: "RSDKv5U",
         url: "#",
-        icon: Icons.Inbox,
+        icon: "./assets/RSDKv5U.png",
     },
 ]
 
@@ -74,8 +71,7 @@ export function AppSidebar() {
                             <Dropdown.DropdownMenuTrigger asChild>
                                 <Sidebar.SidebarMenuButton className="w-fit px-1.5">
                                     <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                                        {/* TODO: RSDK Icon */}
-                                        <img src="/images/RSDK.png" alt="Header Logo" width={32} height={32} />
+                                        <img src={`./assets/RSDK.png`} alt="header logo" width={32} height={32} />
                                     </div>
                                     <span className="truncate font-semibold">RSDK-Library</span>
                                     <Icons.ChevronDown className="opacity-50" />
@@ -125,6 +121,7 @@ export function AppSidebar() {
 
                     <Sidebar.SidebarSeparator />
 
+                    {/* RSDK Engines */}
                     <Collapsible.Collapsible defaultOpen className="group/collapsible">
                         <Sidebar.SidebarGroup>
                             <Sidebar.SidebarGroupLabel asChild>
@@ -134,14 +131,13 @@ export function AppSidebar() {
                                 </Collapsible.CollapsibleTrigger>
                             </Sidebar.SidebarGroupLabel>
 
-                            {/* RSDK Engines */}
                             <Collapsible.CollapsibleContent>
                                 <Sidebar.SidebarGroupContent>
                                     {RSDK_EngineList.map((item) => (
                                         <Sidebar.SidebarMenuItem key={item.title}>
                                             <Sidebar.SidebarMenuButton asChild>
                                                 <a href={item.url}>
-                                                    <item.icon />
+                                                    <img src={item.icon} alt="engine logo" width={16} height={16} />
                                                     <span>{item.title}</span>
                                                 </a>
                                             </Sidebar.SidebarMenuButton>
