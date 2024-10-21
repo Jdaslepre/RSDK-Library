@@ -8,7 +8,7 @@ import * as Icons from "lucide-react"
 import { Button } from "@/components/ui/button"
 import * as Dialog from "@/components/ui/dialog"
 import * as Drawer from "@/components/ui/drawer"
-import { SettingsContent } from "@/components/settings-content";
+import { SettingsContent } from "@/components/home/settings-content";
 import * as Sidebar from "@/components/ui/sidebar"
 
 export function SettingsDialog() {
