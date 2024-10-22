@@ -60,9 +60,9 @@ const RSDK_Resources = [
     },
 ]
 
-export function AppSidebar() {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar.Sidebar>) {
     return (
-        <Sidebar.Sidebar>
+        <Sidebar.Sidebar collapsible="icon" {...props}>
             <Sidebar.SidebarHeader>
                 <Sidebar.SidebarMenu>
                     <Sidebar.SidebarMenuItem>
@@ -71,7 +71,7 @@ export function AppSidebar() {
                             <Dropdown.DropdownMenuTrigger asChild>
                                 <Sidebar.SidebarMenuButton className="w-fit px-1.5">
                                     <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                                        <img src={`./assets/RSDK.png`} alt="header logo" width={32} height={32} />
+                                        <img src={`./assets/RSDK.png`} alt="header logo" />
                                     </div>
                                     <span className="truncate font-semibold">RSDK-Library</span>
                                     <Icons.ChevronDown className="opacity-50" />

@@ -5,11 +5,11 @@ import { useMediaQuery } from "@custom-react-hooks/use-media-query"
 import * as React from "react"
 import * as Icons from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import * as Dialog from "@/components/ui/dialog"
 import * as Drawer from "@/components/ui/drawer"
-import { SettingsContent } from "@/components/home/settings-content";
 import * as Sidebar from "@/components/ui/sidebar"
+
+import { SettingsContent } from "@/components/home/settings-content";
 
 export function SettingsDialog() {
     const [open, setOpen] = React.useState(false)
@@ -30,6 +30,7 @@ export function SettingsDialog() {
                 <Dialog.Dialog open={open} onOpenChange={setOpen}>
                     <Dialog.DialogTrigger asChild>
                         <Sidebar.SidebarMenuButton asChild>
+                            {/* This is the menu item */}
                             <a>
                                 <Icons.Settings2 />
                                 <span>Settings</span>
@@ -38,11 +39,9 @@ export function SettingsDialog() {
                     </Dialog.DialogTrigger>
 
                     <Dialog.DialogContent className="sm:max-w-[425px]">
-                        <Dialog.DialogHeader>
-                            <Dialog.DialogTitle>
-                                <Header />
-                            </Dialog.DialogTitle>
-                        </Dialog.DialogHeader>
+                        <Dialog.DialogTitle>
+                            <Header />
+                        </Dialog.DialogTitle>
                         <Content />
                     </Dialog.DialogContent>
                 </Dialog.Dialog>
