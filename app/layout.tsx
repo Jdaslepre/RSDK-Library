@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 
+import { fontSans } from "@/lib/fonts"
+import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
@@ -15,9 +16,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <head>
                 <link rel="manifest" href="./manifest.webmanifest" />
             </head>
-            <body>
+            <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                    {children}
+                    <div className="w-full h-full">
+                        {children}
+                    </div>
                 </ThemeProvider>
             </body>
         </html>
