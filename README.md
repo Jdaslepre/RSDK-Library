@@ -20,3 +20,5 @@ npx serve@latest out
 ```
 python -m http.server
 ```
+
+###### You don't *have* to build it - though! this website is hosted via github pages - [you can find that here :)](https://jdsle.github.io/RSDK)
