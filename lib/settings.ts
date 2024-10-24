@@ -1,4 +1,8 @@
-'use client'
+'use client';
+
+// ---------------------
+// Component Definitions
+// ---------------------
 
 export interface ISettings {
     enablePlus: boolean;
@@ -35,6 +39,3 @@ export const Update = (updates: Partial<ISettings>) => {
     const newSettings = { ...currentSettings, ...updates };
     Save(newSettings);
 };
-
-const settings = Load();
-console.log('Settings.ts module loaded:', settings);

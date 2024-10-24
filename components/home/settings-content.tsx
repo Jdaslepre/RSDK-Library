@@ -1,88 +1,35 @@
-"use client";
+'use client';
+
+import * as React from 'react';
 
 // --------------------
-// settings-content.tsx
+// UI Component Imports
 // --------------------
 
-import * as React from "react"
+import * as Icons from 'lucide-react';
 
-import * as Settings from "@/lib/settings"
-import { cn } from "@/lib/utils"
+import * as Command from '@/components/ui/command';
+import * as Popover from '@/components/ui/popover';
+import * as Form from '@/components/ui/form';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 
-// -------------------------------
-// Device Profile Combobox Control
-// -------------------------------
+// ------------
+// Misc Imports
+// ------------
 
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Check, ChevronsUpDown } from "lucide-react"
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command"
+import * as Settings from '@/lib/settings';
 
-export function DeviceProfileCombo() {
-    const instSettings = Settings.Load();
-    const [selectedProfile, setSelectedProfile] = React.useState(instSettings.deviceProfile);
-    const [open, setOpen] = React.useState(false)
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-    const list = [
-        {
-            value: "desktop",
-            label: "Desktop",
-        },
-        {
-            value: "mobile",
-            label: "Mobile",
-        },
-    ]
+import { cn } from '@/lib/utils';
+import { z } from 'zod';
 
-    const onSelect = (val: string) => {
-        const newSettings = { ...instSettings, deviceProfile: val };
-        Settings.Save(newSettings);
-    };
-
-    return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-[200px] justify-between"
-                >
-                    {selectedProfile ? list.find((item) => item.value === selectedProfile)?.label : "Select..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
-                <Command>
-                    <CommandList>
-                        <CommandEmpty>que?</CommandEmpty>
-                        <CommandGroup>
-                            {list.map((item) => (
-                                <CommandItem
-                                    key={item.value}
-                                    value={item.value}
-                                    onSelect={(currentValue) => {
-                                        onSelect(currentValue);
-                                        setOpen(false);
-                                    }}
-                                >
-                                    <Check
-                                        className={cn(
-                                            "mr-2 h-4 w-4",
-                                            selectedProfile === item.value ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                    {item.label}
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
-    )
-}
+// ---------------------
+// Component Definitions
+// ---------------------
 
 const FormSchema = z.object({
     theme: z.enum(['auto', 'light', 'dark']).default('auto').optional(),
@@ -91,16 +38,64 @@ const FormSchema = z.object({
     deviceProfile: z.string().default('desktop').optional(),
 });
 
-// ----------------------------
-// Settings Dialog Content Host
-// ----------------------------
+export function DeviceProfileCombo() {
+    const instSettings = Settings.Load();
+    const [open, setOpen] = React.useState(false)
+    const [selectedProfile, setSelectedProfile] = React.useState(instSettings.deviceProfile);
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+    const List = [
+        { value: 'desktop', label: 'Desktop' },
+        { value: 'mobile', label: 'Mobile' },
+    ];
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
-import { Switch } from "@/components/ui/switch";
+    const onSelect = (val: string) => {
+        Settings.Save({ ...instSettings, deviceProfile: val });
+        setSelectedProfile(val);
+    };
+
+    return (
+        <Popover.Popover open={open} onOpenChange={setOpen}>
+            <Popover.PopoverTrigger asChild>
+                <Button
+                    variant='outline'
+                    role='combobox'
+                    aria-expanded={open}
+                    className='w-[200px] justify-between'
+                >
+                    {selectedProfile ? List.find((item) => item.value === selectedProfile)?.label : 'Select...'}
+                    <Icons.ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                </Button>
+            </Popover.PopoverTrigger>
+            <Popover.PopoverContent className='w-[200px] p-0'>
+                <Command.Command>
+                    <Command.CommandList>
+                        <Command.CommandEmpty>que?</Command.CommandEmpty>
+                        <Command.CommandGroup>
+                            {List.map((item) => (
+                                <Command.CommandItem
+                                    key={item.value}
+                                    value={item.value}
+                                    onSelect={(currentValue) => {
+                                        onSelect(currentValue);
+                                        setOpen(false);
+                                    }}
+                                >
+                                    <Icons.Check
+                                        className={cn(
+                                            'mr-2 h-4 w-4',
+                                            selectedProfile === item.value ? 'opacity-100' : 'opacity-0'
+                                        )}
+                                    />
+                                    {item.label}
+                                </Command.CommandItem>
+                            ))}
+                        </Command.CommandGroup>
+                    </Command.CommandList>
+                </Command.Command>
+            </Popover.PopoverContent>
+        </Popover.Popover>
+    )
+}
 
 export function SettingsContent() {
     const instSettings = Settings.Load();
@@ -130,22 +125,22 @@ export function SettingsContent() {
     };
 
     return (
-        <Form {...form}>
-            <form className="w-full space-y-6">
+        <Form.Form {...form}>
+            <form className='w-full space-y-6'>
                 <div>
-                    <div className="space-y-4">
-                        <FormField
+                    <div className='space-y-4'>
+                        <Form.FormField
                             control={form.control}
-                            name="enablePlus"
+                            name='enablePlus'
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                    <div className="space-y-0.5">
-                                        <FormLabel>Enable Plus DLC</FormLabel>
-                                        <FormDescription>
+                                <Form.FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                                    <div className='space-y-0.5'>
+                                        <Form.FormLabel>Enable Plus DLC</Form.FormLabel>
+                                        <Form.FormDescription>
                                             Enables the Plus DLC on supported engines
-                                        </FormDescription>
+                                        </Form.FormDescription>
                                     </div>
-                                    <FormControl>
+                                    <Form.FormControl>
                                         <Switch
                                             checked={field.value}
                                             onCheckedChange={(checked) => {
@@ -153,23 +148,23 @@ export function SettingsContent() {
                                                 actionSave({ ...form.getValues(), enablePlus: checked });
                                             }}
                                         />
-                                    </FormControl>
-                                </FormItem>
+                                    </Form.FormControl>
+                                </Form.FormItem>
                             )}
                         />
 
-                        <FormField
+                        <Form.FormField
                             control={form.control}
-                            name="enableConsole"
+                            name='enableConsole'
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                    <div className="space-y-0.5">
-                                        <FormLabel>Enable Console</FormLabel>
-                                        <FormDescription>
+                                <Form.FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                                    <div className='space-y-0.5'>
+                                        <Form.FormLabel>Enable Console</Form.FormLabel>
+                                        <Form.FormDescription>
                                             Enables the emscripten console for the engines
-                                        </FormDescription>
+                                        </Form.FormDescription>
                                     </div>
-                                    <FormControl>
+                                    <Form.FormControl>
                                         <Switch
                                             checked={field.value}
                                             onCheckedChange={(checked) => {
@@ -177,28 +172,28 @@ export function SettingsContent() {
                                                 actionSave({ ...form.getValues(), enableConsole: checked });
                                             }}
                                         />
-                                    </FormControl>
-                                </FormItem>
+                                    </Form.FormControl>
+                                </Form.FormItem>
                             )}
                         />
 
-                        <FormField
+                        <Form.FormField
                             control={form.control}
-                            name="deviceProfile"
+                            name='deviceProfile'
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                    <div className="space-y-0.5">
-                                        <FormLabel>Device Profile</FormLabel>
+                                <Form.FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                                    <div className='space-y-0.5'>
+                                        <Form.FormLabel>Device Profile</Form.FormLabel>
                                     </div>
-                                    <FormControl>
+                                    <Form.FormControl>
                                         <DeviceProfileCombo />
-                                    </FormControl>
-                                </FormItem>
+                                    </Form.FormControl>
+                                </Form.FormItem>
                             )}
                         />
                     </div>
                 </div>
             </form>
-        </Form>
+        </Form.Form>
     );
 }

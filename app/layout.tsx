@@ -1,27 +1,32 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import './globals.css';
 
-import { fontSans } from "@/lib/fonts"
-import { cn } from "@/lib/utils"
-import { ThemeProvider } from "@/components/theme-provider"
+import type { Metadata } from 'next';
+import Script from 'next/script'
+
+import { GeistSans } from 'geist/font/sans'
+import { ThemeProvider } from '@/components/theme-provider'
 
 export const metadata: Metadata = {
-    title: "RSDK-Library",
-    description: "RSDK-Library website",
+    title: 'RSDK-Library',
+    description: 'RSDK-Library website',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang='en' suppressHydrationWarning>
             <head>
-                <link rel="manifest" href="./manifest.webmanifest" />
+                <link rel='manifest' href='./manifest.webmanifest' />
             </head>
-            <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
-                <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                    <div className="w-full h-full">
-                        {children}
+            <body className={GeistSans.className}>
+                <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+                    <div vaul-drawer-wrapper=''>
+                        <div className='relative flex min-h-screen flex-col bg-background'>
+                            {children}
+                        </div>
                     </div>
                 </ThemeProvider>
+                <Script src='./modules/ModuleInit.js'/>
+                <Script src='./modules/Files.js'/>
             </body>
         </html>
     )
