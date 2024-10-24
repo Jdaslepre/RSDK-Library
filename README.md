@@ -4,15 +4,19 @@
 Website source code for RSDK-Library
 
 ### Building
+###### [(You're gonna need node.js for this.)](https://nodejs.org/en/download/package-manager)
+##### Simply run this command, and you should be good to go -
 ```
 npm run build
 ```
 
-### After building, you can host it by running
+##### This project is configured to output as a static site, after you build - it should be in (root)/out.
+##### To host it with npx, you can use this command from the root directory -
 ```
 npx serve@latest out
 ```
-##### (or you can also use python to host it)
+
+##### or [if you'd like to use python](https://www.python.org/downloads/), you can host it by running this command in (root)/(output_dir)
 ```
 python -m http.server
 ```
