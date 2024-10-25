@@ -16,7 +16,7 @@ import * as Sidebar from '@/components/ui/sidebar';
 // Home UI Component Imports
 // -------------------------
 
-import { SettingsContent } from '@/components/home/settings-content';
+import { SettingsContent } from '@/app/controls/settings-content';
 
 // ------------
 // Misc Imports

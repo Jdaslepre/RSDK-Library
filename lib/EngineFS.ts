@@ -3,6 +3,8 @@ declare const IDBFS: any;
 
 let once = false;
 
+// Bad programming ahead, be warned
+
 // ---------------------
 // Component Definitions
 // ---------------------
@@ -17,10 +19,11 @@ export type FileItem = {
 
 class EngineFS {
     public currentPath: string = "//FileSystem";
+    private clipboard: { items: FileItem[], isCut: boolean } | null = null;
     public actionInProgress: boolean = false;
-    public actionProgress: number = 0; 
+    public actionProgress: number = 0;
 
-    constructor() {}
+    constructor() { }
 
     async Initialize() {
         if (once === true)
@@ -31,12 +34,11 @@ class EngineFS {
             FS.mount(IDBFS, {}, 'FileSystem');
 
             await this.Init();
-
-            // ['RSDKv2','RSDKv3','RSDKv4','RSDKv5','RSDKv5U'].forEach(dir => FS.mkdir(`FileSystem/${dir}`));
-
+            
             console.log('FileSystem initialized');
             once = true;
-        } catch (errorInit) {
+        } catch (errorInit: any) {
+            alert('Error initializing file system: ' + errorInit);
             console.error('Error initializing file system:', errorInit);
             throw errorInit;
         }
@@ -46,7 +48,8 @@ class EngineFS {
         return new Promise<void>((resolve, reject) => {
             FS.syncfs(true, function (err: any) {
                 if (err) {
-                    console.error('Error:', err);
+                    alert('Error syncing FS: ' + err);
+                    console.error('Error syncing FS:', err);
                     reject(err);
                 } else {
                     console.log('Synchronized FS');
@@ -60,7 +63,8 @@ class EngineFS {
         return new Promise<void>((resolve, reject) => {
             FS.syncfs(function (err: any) {
                 if (err) {
-                    console.error('Error:', err);
+                    alert('Error syncing FS: ' + err);
+                    console.error('Error syncing FS:', err);
                     reject(err);
                 } else {
                     console.log('Synchronized FS');
@@ -74,15 +78,25 @@ class EngineFS {
     // General
     // -------
 
+    private PathNormalize(path: string): string {
+        return path.replace(/\/+/g, '/').replace(/\/$/, '');
+    }
+
+    private CheckSubdir(source: string, destination: string): boolean {
+        const srcP = source.split('/');
+        const dstP = destination.split('/');
+
+        return dstP.length > srcP.length &&
+            srcP.every((part, index) => part === dstP[index]);
+    }
+
     async RetPathItems(): Promise<FileItem[]> {
         const files: FileItem[] = [];
-
         for (const name of FS.readdir(this.currentPath)) {
             if (name === "." || name === "..")
                 continue;
 
             const path = `${this.currentPath}/${name}`;
-
             files.push({
                 name,
                 path,
@@ -93,48 +107,105 @@ class EngineFS {
         return files;
     }
 
-    async ItemRename(oldName: string, newName: string) {
-        try {
-            const oldPath = `${this.currentPath}/${oldName}`;
-            const newPath = `${this.currentPath}/${newName}`;
-    
-            const stat = FS.lookupPath(oldPath);
-            if (!stat.node) {
-                throw new Error(`Item "${oldName}" does not exist.`);
+    async ItemCopy(items: FileItem[]) {
+        this.clipboard = { items, isCut: false };
+        console.log('Copied items:', items);
+    }
+
+    private async ItemDoCopy(item: FileItem, src: string, dst: string) {
+        if (this.CheckSubdir(this.PathNormalize(src), this.PathNormalize(dst))) {
+            alert(`Whoa there!\nThe destination folder is a subfolder of the source folder`);
+            return;
+        }
+        if (item.isDirectory) {
+            try {
+                FS.stat(dst);
+            } catch (e: any) {
+                FS.mkdir(dst);
             }
-    
-            FS.rename(oldPath, newPath);
-            console.log(`Renamed ${oldPath} to ${newPath}`);
-    
+            await this.DirCopyRecursive(src, dst);
+            return;
+        } 
+        FS.writeFile(dst, FS.readFile(src));
+    }
+
+    async ItemCut(items: FileItem[]) {
+        this.clipboard = { items, isCut: true };
+        console.log('Cut items:', items);
+    }
+
+    async ItemPaste() {
+        if (!this.clipboard) {
+            console.warn('Clipboard is empty. No items to paste.');
+            return;
+        }
+        const { items, isCut } = this.clipboard;
+        const pastePromises = items.map(async (item) => {
+            const oldPath = item.path;
+            const newPath = `${this.currentPath}/${item.name}`;
+            console.log(`Attempting to paste ${isCut ? 'move' : 'copy'}: ${oldPath} -> ${newPath}`);
+            this.actionInProgress = true;
+            try {
+                if (!FS.lookupPath(oldPath).node) {
+                    alert('Source path does not exist: ' + oldPath);
+                    console.error(`Source path does not exist: ${oldPath}`);
+                    this.actionInProgress = false;
+                    return;
+                }
+                if (isCut) {
+                    FS.rename(oldPath, newPath);
+                    console.log(`Moved ${oldPath} to ${newPath}`);
+                } else {
+                    await this.ItemDoCopy(item, oldPath, newPath);
+                }
+            } catch (error) {
+                alert('Error during paste operation for ' + item.name + ':' + error);
+                console.error(`Error during paste operation for ${item.name}:`, error);
+                this.actionInProgress = false;
+            }
+        });
+        await Promise.all(pastePromises);
+        await this.Save();
+        this.actionInProgress = false;
+        this.clipboard = null;
+    }
+
+    async ItemRename(srcName: string, dstName: string) {
+        try {
+            const srcPath = `${this.currentPath}/${srcName}`;
+            const dstPath = `${this.currentPath}/${dstName}`;
+            if (!FS.lookupPath(srcPath).node) {
+                throw new Error(`Item "${srcName}" does not exist.`);
+            }
+            FS.rename(srcPath, dstPath);
             await this.Save();
         } catch (error) {
+            alert('Error renaming item: ' + error)
             console.error('Error renaming item:', error);
             throw error;
         }
-    }    
+    }
 
-    async ItemDelete(fileNames: string[]) {
+    async ItemDelete(names: string[]) {
         try {
-            for (const fileName of fileNames) {
-                const filePath = `${this.currentPath}/${fileName}`;
-                const stat = FS.lookupPath(filePath);
-    
-                if (!stat.node) {
-                    console.warn(`Tried to delete "${fileName}" - which doesn't exist?`);
+            if (!window.confirm(`Are you sure you want to delete the selected items? This action is irreversible.`)) {
+                return;
+            }
+            for (const i of names) {
+                const path = `${this.currentPath}/${i}`;
+                if (!FS.lookupPath(path).node) {
+                    console.warn(`Tried to delete "${i}" - which doesn't exist?`);
                     continue;
                 }
-    
-                if (this.DirCheck(filePath)) {
-                    FS.rmdir(filePath);
-                    console.log(`Directory ${fileName} deleted from ${this.currentPath}`);
+                if (this.DirCheck(path)) {
+                    this.DirDeleteRecursive(path);
                 } else {
-                    FS.unlink(filePath);
-                    console.log(`File ${fileName} deleted from ${this.currentPath}`);
+                    FS.unlink(path);
                 }
             }
-    
             await this.Save();
-        } catch (err) {
+        } catch (err: any) {
+            alert('Error deleting items: ' + err);
             console.error('Error deleting items:', err);
             throw err;
         }
@@ -143,48 +214,9 @@ class EngineFS {
     // -----
     // Files
     // -----
-/*
-    async FileUpload() { // TODO: ZIP EXTRACTION
-        return new Promise<void>((resolve, reject) => {
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.multiple = true;
-            fileInput.onchange = async () => {
-                if (fileInput.files!.length > 0) {
 
-                    for (let i = 0; i < fileInput.files!.length; i++) {
-                        const file = fileInput.files![i];
-                        const filePath = `${this.currentPath}/${file.name}`;
-
-                        const reader = new FileReader();
-                        reader.onload = function (event) {
-                            const fileData = new Uint8Array(event.target!.result as ArrayBuffer);
-                            FS.writeFile(filePath, fileData, { encoding: 'binary' });
-
-                            if (i === fileInput.files!.length - 1) {
-                                FS.syncfs(function (err: any) {
-                                    if (err) {
-                                        console.error('Error:', err);
-                                    } else {
-                                        console.log(`Wrote file(s) to FS`);
-                                    }
-                                    resolve();
-                                });
-                            }
-                        };
-
-                        reader.readAsArrayBuffer(file);
-                    }
-                } else {
-                    reject('No files selected');
-                }
-            };
-            fileInput.click();
-        });
-    }
-        */
-
-    async FileUpload() { // TODO: ZIP EXTRACTION
+    // TODO: ZIP EXTRACTION
+    async FileUpload() {
         return new Promise<void>((resolve, reject) => {
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
@@ -196,32 +228,34 @@ class EngineFS {
                 if (fileInput.files!.length > 0) {
                     self.actionInProgress = true;
                     const totalFiles = fileInput.files!.length;
-    
+
                     for (let i = 0; i < totalFiles; i++) {
                         const file = fileInput.files![i];
                         const filePath = `${this.currentPath}/${file.name}`;
-    
+
                         const reader = new FileReader();
-                        reader.onload = function (event) {
+                        reader.onload = async function (event) {
                             const fileData = new Uint8Array(event.target!.result as ArrayBuffer);
                             FS.writeFile(filePath, fileData, { encoding: 'binary' });
-    
+
                             self.actionProgress = Math.round(((i + 1) / totalFiles) * 100);
                             console.log(`Upload Progress: ${self.actionProgress}%`);
-    
+
+                            await new Promise(resolve => setTimeout(resolve, 0));
+
                             if (i === totalFiles - 1) {
                                 FS.syncfs(function (err: any) {
                                     if (err) {
-                                        console.error('Error:', err);
+                                        alert('Error syncing FS: ' + err);
+                                        console.error('Error syncing FS:', err);
                                     } else {
-                                        console.log(`Wrote file(s) to FS`);
                                         self.actionInProgress = false;
                                     }
                                     resolve();
                                 });
                             }
                         };
-    
+
                         reader.readAsArrayBuffer(file);
                     }
                 } else {
@@ -231,29 +265,28 @@ class EngineFS {
             fileInput.click();
         });
     }
-    
 
-    async FileDownload(filePath: string) {
+    async FileDownload(path: string) {
         try {
-            const fileData = FS.readFile(filePath);
-            const blob = new Blob([fileData], { type: 'application/octet-stream' });
-    
+            const blob = new Blob([FS.readFile(path)], { type: 'application/octet-stream' });
+
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = filePath.split('/').pop() || 'download';
-    
+            link.download = path.split('/').pop() || 'download';
+
             document.body.appendChild(link);
             link.click();
-    
+
             setTimeout(() => {
                 document.body.removeChild(link);
                 URL.revokeObjectURL(link.href);
             }, 100);
-        } catch (error) {
+        } catch (error: any) {
+            alert('Error downloading file: ' + error);
             console.error('Error downloading file:', error);
             throw error;
         }
-    }    
+    }
 
     // This returns in mb
     FileGetSize(path: string) {
@@ -269,38 +302,131 @@ class EngineFS {
         return FS.isDir(mode);
     }
 
-    async DirCreate(dirName: string) {
+    async DirCreate(name: string) {
         try {
-            const dirPath = `${this.currentPath}/${dirName}`;
-            FS.mkdir(dirPath);
+            const dstPath = `${this.currentPath}/${name}`;
+            FS.mkdir(dstPath);
 
             FS.syncfs(function (err: any) {
                 if (err) {
-                    console.error('Error:', err);
+                    alert('Error syncing FS ' + err);
+                    console.error('Error syncing FS:', err);
                 } else {
-                    console.log(`Wrote ${dirPath} to FS`);
+                    console.log(`Wrote ${dstPath} to FS`);
                 }
             });
         } catch (err) {
+            alert('Error creating directory: ' + err);
             console.error('Error creating directory:', err);
             throw err;
         }
     }
 
-    async DirChange(dirName: string) {
-        if (dirName === '..') {
-            const splitPath = this.currentPath.split('/');
-            if (splitPath.length > 1) {
-                splitPath.pop();
-                this.currentPath = splitPath.join('/');
+    // god this is awful
+    private async DirCopyRecursive(src: string, dest: string) {
+        try {
+            try {
+                FS.stat(dest);
+            } catch (e) {
+                FS.mkdir(dest);
             }
-        } else {
-            this.currentPath = `${this.currentPath}/${dirName}`.replace(/\/+/g, '/');
+            const files = FS.readdir(src);
+            await Promise.all(files.map(async (file: any) => {
+                if (file === '.' || file === '..') return;
+                const srcPath = `${src}/${file}`;
+                const destPath = `${dest}/${file}`;
+                if (this.DirCheck(srcPath)) {
+                    await this.DirCopyRecursive(srcPath, destPath);
+                } else {
+                    try {
+                        FS.stat(destPath);
+                        console.warn(`File ${destPath} already exists. Skipping.`);
+                    } catch (e) {
+                        FS.writeFile(destPath, FS.readFile(srcPath));
+                        console.log(`Copied file ${srcPath} to ${destPath}`);
+                    }
+                }
+            }));
+        } catch (error) {
+            alert('Error copying directory from ' + src + ' to ' + dest + ': ' + error);
+            console.error(`Error copying directory from ${src} to ${dest}:`, error);
         }
-        console.log('Current directory:', this.currentPath);
-        return this.RetPathItems();
     }
 
+    private DirDeleteRecursive(path: string) {
+        try {
+            const files: string[] = FS.readdir(path);
+
+            files.forEach((file: string) => {
+                if (file === '.' || file === '..') {
+                    return;
+                }
+                const filePath = path + '/' + file;
+                const stat = FS.stat(filePath);
+
+                if (FS.isDir(stat.mode)) {
+                    this.DirDeleteRecursive(filePath);
+                } else if (FS.isFile(stat.mode)) {
+                    FS.unlink(filePath);
+                }
+            });
+
+            FS.rmdir(path);
+        } catch (err) {
+            alert('Failed to delete directory: ' + err);
+            console.error('Failed to delete directory:', err);
+        }
+    }
+
+    async ResetFileSystem() {
+        if (!window.confirm(`Are you sure you want to reset the FileSystem?\n"Reset" as in, delete everything. This action is irreversible.`)) {
+            return;
+        }
+        if (!window.confirm(`Are you sure you want to reset the FileSystem?\nJust making sure.`)) {
+            return;
+        }
+    
+        // warned you twice, anything that happens after this is your fault
+
+        try {
+            const fsPath = '//FileSystem';
+    
+            if (this.DirCheck(fsPath)) {
+                this.ResetFSLogic(fsPath);
+                await this.Save();
+                console.log('FileSystem has been reset successfully.');
+            }
+        } catch (error) {
+            alert('Error resetting FileSystem: ' + error);
+            console.error('Error resetting FileSystem:', error);
+            throw error;
+        }
+    }
+
+    // literally just DirDeleteRecursive without the rmdir
+    private ResetFSLogic(path: string) {
+        try {
+            const files: string[] = FS.readdir(path);
+
+            files.forEach((file: string) => {
+                if (file === '.' || file === '..') {
+                    return;
+                }
+                const filePath = path + '/' + file;
+                const stat = FS.stat(filePath);
+
+                if (FS.isDir(stat.mode)) {
+                    this.DirDeleteRecursive(filePath);
+                } else if (FS.isFile(stat.mode)) {
+                    FS.unlink(filePath);
+                }
+            });
+
+        } catch (err) {
+            alert('Failed to delete directory: ' + err);
+            console.error('Failed to delete directory:', err);
+        }
+    }
 }
 
 export default EngineFS;

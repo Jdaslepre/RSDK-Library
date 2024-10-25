@@ -4,7 +4,7 @@ import * as React from 'react';
 // Home UI Component Imports
 // -------------------------
 
-import { useBreadcrumb } from '@/components/home/breadcrumb';
+import { useBreadcrumb } from '@/app/controls/breadcrumb';
 
 // ---------------------
 // Component Definitions
@@ -63,11 +63,9 @@ const PageLoader: React.FC<Props> = ({ path, setCurrentPath }) => {
     }, [path, setCurrentPath, AddNode, ResetNodes]);
 
     return (
-        <div>
-            <React.Suspense fallback={<div>Loading...</div>}>
-                {Component ? <Component /> : null}
-            </React.Suspense>
-        </div>
+        <React.Suspense fallback={<div>Loading...</div>}>
+            {Component ? <Component /> : null}
+        </React.Suspense>
     );
 };
 

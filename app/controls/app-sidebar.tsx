@@ -16,7 +16,7 @@ import * as Sidebar from '@/components/ui/sidebar';
 // Home UI Component Imports
 // -------------------------
 
-import { SettingsDialog } from '@/components/home/settings-dialog';
+import { SettingsDialog } from '@/app/controls/settings-dialog';
 
 // ---------------------
 // Component Definitions

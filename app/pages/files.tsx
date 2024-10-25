@@ -8,9 +8,9 @@ import * as React from 'react';
 
 import * as Icons from 'lucide-react';
 
-import * as CtxMenu from '@/components/ui/context-menu'
 import * as Tooltip from '@/components/ui/tooltip';
 import * as AlertDialog from '@/components/ui/alert-dialog'
+import * as Dropdown from '@/components/ui/dropdown-menu';
 
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
@@ -27,7 +27,7 @@ import { FileItem } from '@/lib/EngineFS';
 // Home UI Component Imports
 // -------------------------
 
-import { useBreadcrumb } from '@/components/home/breadcrumb';
+import { useBreadcrumb } from '@/app/controls/breadcrumb';
 
 // ---------------------
 // Component Definitions
@@ -35,7 +35,7 @@ import { useBreadcrumb } from '@/components/home/breadcrumb';
 
 const FilesPage: React.FC = () => {
     const engineFS = React.useRef(new EngineFS()).current;
-    const { items, AddNode } = useBreadcrumb();
+    const { AddNode, ResetNodes } = useBreadcrumb();
 
     const [files, setFiles] = React.useState<FileItem[]>([]);
     const [selectedFiles, setSelectedFiles] = React.useState<string[]>([]);
@@ -45,17 +45,17 @@ const FilesPage: React.FC = () => {
 
     const joinPath = (...parts: string[]): string => parts.join('/').replace(/\/+/g, '/');
 
-    const RefreshFileList = async () => {
+    const DoRefresh = async () => {
         const entries = await engineFS.RetPathItems();
         setFiles(entries);
+        UpdateBreadcrumb(engineFS.currentPath);
     };
 
     React.useEffect(() => {
         const loadFiles = async () => {
             try {
                 await engineFS.Initialize();
-                await RefreshFileList();
-                UpdateBreadcrumb(engineFS.currentPath);
+                await DoRefresh();
             } catch (error) {
                 console.error('Error loading files:', error);
             }
@@ -73,24 +73,17 @@ const FilesPage: React.FC = () => {
     }, [engineFS]);
 
     const UpdateBreadcrumb = (path: string) => {
-        const pathParts = path.split('/').filter(Boolean);
-        items.forEach((item) => {
-            if (item.path !== path) {
-                item.onClick = undefined;
-            }
-        });
-        pathParts.forEach((part, index) => {
-            const cumulativePath = joinPath('/', ...pathParts.slice(0, index + 1));
-            if (!items.some(item => item.path === cumulativePath)) {
-                AddNode(part, cumulativePath, () => ChangeDir(cumulativePath));
-            }
+        const parts = path.split('/').filter(Boolean);
+        ResetNodes();
+        parts.forEach((part, index) => {
+            const currentPath = joinPath('/', ...parts.slice(0, index + 1));
+            AddNode(part, currentPath, () => ChangeDir(currentPath));
         });
     };
 
     const ChangeDir = async (path: string) => {
         engineFS.currentPath = path;
-        await RefreshFileList();
-        UpdateBreadcrumb(path);
+        await DoRefresh();
     };
 
     // -------------------
@@ -98,32 +91,39 @@ const FilesPage: React.FC = () => {
     // -------------------
 
     const Toolbar_NewFolder_OnClick = async () => {
-        const folderName = prompt('Folder name:');
-        if (folderName) {
-            await engineFS.DirCreate(folderName);
-            await RefreshFileList();
+        const name = prompt('Folder name:');
+        if (name) {
+            await engineFS.DirCreate(name);
+            await DoRefresh();
         }
     };
 
     const Toolbar_Export_OnClick = async () => {
         if (selectedFiles.length !== 1) {
             // todo: allow multiple (via zip?)
+            alert('Currently, only one item is allowed');
             return;
         }
+        const path = joinPath(engineFS.currentPath, selectedFiles[0]);
+        await engineFS.FileDownload(path);
+    };
 
-        const fileName = selectedFiles[0];
-        const filePath = joinPath(engineFS.currentPath, fileName);
-        try {
-            await engineFS.FileDownload(filePath);
-        } catch (error) {
-            console.error('Error exporting file:', error);
-        }
+    const Toolbar_ItemCut_OnClick = async () => {
+        const selectedItems = files.filter(file => selectedFiles.includes(file.name));
+        await engineFS.ItemCut(selectedItems);
+    };
+    const Toolbar_ItemCopy_OnClick = async () => {
+        const selectedItems = files.filter(file => selectedFiles.includes(file.name));
+        await engineFS.ItemCopy(selectedItems);
+    };
+    const Toolbar_ItemPaste_OnClick = async () => {
+        await engineFS.ItemPaste();
+        await DoRefresh();
     };
 
     const Toolbar_Rename_OnClick = async () => {
-        // TODO: shadcn dialog?
-
         if (selectedFiles.length !== 1) {
+            alert('You can only rename one item at a time.');
             return;
         }
         const name = selectedFiles[0];
@@ -131,7 +131,7 @@ const FilesPage: React.FC = () => {
         if (nameRen && nameRen !== name) {
             try {
                 await engineFS.ItemRename(name, nameRen);
-                await RefreshFileList();
+                await DoRefresh();
             } catch (error) {
                 console.error('Error renaming item:', error);
             }
@@ -140,7 +140,7 @@ const FilesPage: React.FC = () => {
 
     const Toolbar_Delete_OnClick = async () => {
         await engineFS.ItemDelete(selectedFiles);
-        await RefreshFileList();
+        await DoRefresh();
         setSelectedFiles([]);
     };
 
@@ -154,21 +154,17 @@ const FilesPage: React.FC = () => {
             setSelectedFiles([file]);
         }
     };
-
     const FileItem_OnDblClick = async (file: FileItem) => {
         if (file.isDirectory) {
             ChangeDir(joinPath(engineFS.currentPath, file.name));
         }
     };
 
-    const FileList_OnClick = () => {
-        setSelectedFiles([]);
-
-        // TODO: Dragging rect?
-    };
+    const FileList_OnClick = () => setSelectedFiles([]);
 
     return (
         <div className='flex flex-col h-full'>
+
             {/* Upload progress dialog */}
             <AlertDialog.AlertDialog open={actionFinished}>
                 <AlertDialog.AlertDialogTrigger />
@@ -185,9 +181,9 @@ const FilesPage: React.FC = () => {
                 <Tooltip.TooltipProvider>
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
-                            <Button variant='outline' onClick={async () => {
+                            <Button variant='outline' size='icon' onClick={async () => {
                                 await engineFS.FileUpload();
-                                RefreshFileList();
+                                DoRefresh();
                             }}>
                                 <Icons.Upload />
                             </Button>
@@ -198,7 +194,7 @@ const FilesPage: React.FC = () => {
                     </Tooltip.Tooltip>
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
-                            <Button variant='outline' onClick={Toolbar_Export_OnClick}>
+                            <Button variant='outline' size='icon' onClick={Toolbar_Export_OnClick}>
                                 <Icons.Download />
                             </Button>
                         </Tooltip.TooltipTrigger>
@@ -208,7 +204,7 @@ const FilesPage: React.FC = () => {
                     </Tooltip.Tooltip>
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
-                            <Button variant='outline' onClick={Toolbar_NewFolder_OnClick}>
+                            <Button variant='outline' size='icon' onClick={Toolbar_NewFolder_OnClick}>
                                 <Icons.FolderClosed />
                             </Button>
                         </Tooltip.TooltipTrigger>
@@ -219,7 +215,7 @@ const FilesPage: React.FC = () => {
                     <Separator orientation='vertical' className='ml-2 mr-2 h-4' />
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
-                            <Button variant='outline' onClick={() => { /* cut */ }}>
+                            <Button variant='outline' size='icon' onClick={Toolbar_ItemCut_OnClick}>
                                 <Icons.Scissors />
                             </Button>
                         </Tooltip.TooltipTrigger>
@@ -229,7 +225,7 @@ const FilesPage: React.FC = () => {
                     </Tooltip.Tooltip>
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
-                            <Button variant='outline' onClick={() => { /* copy */ }}>
+                            <Button variant='outline' size='icon' onClick={Toolbar_ItemCopy_OnClick}>
                                 <Icons.Copy />
                             </Button>
                         </Tooltip.TooltipTrigger>
@@ -239,7 +235,7 @@ const FilesPage: React.FC = () => {
                     </Tooltip.Tooltip>
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
-                            <Button variant='outline' onClick={() => { /* paste */ }}>
+                            <Button variant='outline' size='icon' onClick={Toolbar_ItemPaste_OnClick}>
                                 <Icons.Clipboard />
                             </Button>
                         </Tooltip.TooltipTrigger>
@@ -249,8 +245,8 @@ const FilesPage: React.FC = () => {
                     </Tooltip.Tooltip>
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
-                            <Button variant='outline' onClick={Toolbar_Rename_OnClick}>
-                                <Icons.TextCursorInput />
+                            <Button variant='outline' size='icon' onClick={Toolbar_Rename_OnClick}>
+                                <Icons.Edit />
                             </Button>
                         </Tooltip.TooltipTrigger>
                         <Tooltip.TooltipContent>
@@ -259,7 +255,7 @@ const FilesPage: React.FC = () => {
                     </Tooltip.Tooltip>
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
-                            <Button variant='outline' onClick={Toolbar_Delete_OnClick}>
+                            <Button variant='outline' size='icon' onClick={Toolbar_Delete_OnClick}>
                                 <Icons.Trash />
                             </Button>
                         </Tooltip.TooltipTrigger>
@@ -267,47 +263,52 @@ const FilesPage: React.FC = () => {
                             <p>Delete selected item</p>
                         </Tooltip.TooltipContent>
                     </Tooltip.Tooltip>
+                    <Separator orientation='vertical' className='ml-2 mr-2 h-4' />
+                    <Dropdown.DropdownMenu>
+                        <Dropdown.DropdownMenuTrigger asChild>
+                            <Button variant='outline' size='icon'><Icons.Settings /></Button>
+                        </Dropdown.DropdownMenuTrigger>
+                        <Dropdown.DropdownMenuContent className="w-56">
+                            <Dropdown.DropdownMenuLabel>Options</Dropdown.DropdownMenuLabel>
+                            <Dropdown.DropdownMenuSeparator />
+                            <Dropdown.DropdownMenuGroup>
+
+                                {/* TODO: Zip */}
+                                <Dropdown.DropdownMenuItem>
+                                    <Icons.FolderArchive />
+                                    <span>Export FileSystem as .zip</span>
+                                </Dropdown.DropdownMenuItem>
+
+                                <Dropdown.DropdownMenuItem onClick={async () => {
+                                    await engineFS.ResetFileSystem();
+                                    DoRefresh();
+                                }}>
+                                    <Icons.FolderClosed />
+                                    <span>Reset FileSystem</span>
+                                </Dropdown.DropdownMenuItem>
+
+                            </Dropdown.DropdownMenuGroup>
+                        </Dropdown.DropdownMenuContent>
+                    </Dropdown.DropdownMenu>
                 </Tooltip.TooltipProvider>
             </div>
-            <div className='flex-1 mt-4 overflow-y-auto' onClick={FileList_OnClick}>
-                <ul className='file-list flex flex-col w-full gap-y-1'>
-                    {files.map((file, index) => (
-                        <CtxMenu.ContextMenu key={index}>
-                            <CtxMenu.ContextMenuTrigger>
-                                <Toggle
-                                    className={`inline-flex items-center justify-start h-8 px-3 w-full file-item ${selectedFiles.includes(file.name) ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}`}
-                                    aria-pressed={selectedFiles.includes(file.name)}
-                                    data-state={selectedFiles.includes(file.name) ? 'on' : 'off'}
-                                    onClick={(event) => FileItem_OnClick(file.name, event)}
-                                    onDoubleClick={() => FileItem_OnDblClick(file)}
-                                >
-                                    <a className='flex items-center gap-2 w-full'>
-                                        {file.isDirectory ? <Icons.FolderClosed width={'16px'} height={'16px'} /> : <Icons.File width={'16px'} height={'16px'} />}
-                                        <span>{file.name}</span>
-                                    </a>
-                                </Toggle>
-                            </CtxMenu.ContextMenuTrigger>
-                            <CtxMenu.ContextMenuContent>
-                                <CtxMenu.ContextMenuItem onClick={() => console.log('View')}>
-                                    <Icons.Eye width={'16px'} height={'16px'} className='mr-2' />
-                                    View
-                                </CtxMenu.ContextMenuItem>
-                                <CtxMenu.ContextMenuItem onClick={() => console.log('Edit')}>
-                                    <Icons.Edit width={'16px'} height={'16px'} className='mr-2' />
-                                    Edit
-                                </CtxMenu.ContextMenuItem>
-                                <CtxMenu.ContextMenuItem onClick={() => console.log('Rename')}>
-                                    <Icons.TextCursorInput width={'16px'} height={'16px'} className='mr-2' />
-                                    Rename
-                                </CtxMenu.ContextMenuItem>
-                                <CtxMenu.ContextMenuItem onClick={() => console.log('Delete')}>
-                                    <Icons.Trash width={'16px'} height={'16px'} className='mr-2' />
-                                    Delete
-                                </CtxMenu.ContextMenuItem>
-                            </CtxMenu.ContextMenuContent>
-                        </CtxMenu.ContextMenu>
-                    ))}
-                </ul>
+
+            {/* File List Container */}
+            <div className='flex-1 mt-4 overflow-y-auto flex flex-col' onClick={FileList_OnClick}>
+                {files.map((file, index) => (
+                    <Toggle
+                        key={index}
+                        className={`h-8 px-3 w-full items-center justify-start file-item flex-shrink-0`}
+                        aria-pressed={selectedFiles.includes(file.name)}
+                        data-state={selectedFiles.includes(file.name) ? 'on' : 'off'}
+                        onClick={(event) => FileItem_OnClick(file.name, event)}
+                        onDoubleClick={() => FileItem_OnDblClick(file)}>
+                        <a className='flex items-center gap-2 w-full'>
+                            {file.isDirectory ? <Icons.FolderClosed width={'16px'} height={'16px'} /> : <Icons.File width={'16px'} height={'16px'} />}
+                            <span>{file.name}</span>
+                        </a>
+                    </Toggle>
+                ))}
             </div>
         </div>
     );

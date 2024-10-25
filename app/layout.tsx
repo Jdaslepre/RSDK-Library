@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import Script from 'next/script'
 
 import { GeistSans } from 'geist/font/sans'
-import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeProvider } from '@/app/controls/theme-provider'
 
 export const metadata: Metadata = {
     title: 'RSDK-Library',
