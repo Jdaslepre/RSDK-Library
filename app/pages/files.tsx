@@ -99,13 +99,11 @@ const FilesPage: React.FC = () => {
     };
 
     const Toolbar_Export_OnClick = async () => {
-        if (selectedFiles.length !== 1) {
-            // todo: allow multiple (via zip?)
-            alert('Currently, only one item is allowed');
+        if (selectedFiles.length === 0) {
             return;
         }
-        const path = joinPath(engineFS.currentPath, selectedFiles[0]);
-        await engineFS.FileDownload(path);
+        const paths = selectedFiles.map(file => joinPath(engineFS.currentPath, file));
+        await engineFS.FileDownload(paths);
     };
 
     const Toolbar_ItemCut_OnClick = async () => {

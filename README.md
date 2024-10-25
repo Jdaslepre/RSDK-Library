@@ -3,7 +3,10 @@
 
 Website source code for RSDK-Library
 
-### Building
+## Known issues
+* Uploading files *might* just hang. This can be caused by having an insufficient amount of disk space available.
+
+## Building
 ###### [(You're gonna need node.js for this.)](https://nodejs.org/en/download/package-manager)
 ##### Simply run this command, and you should be good to go -
 ```
@@ -22,3 +25,6 @@ python -m http.server
 ```
 
 ###### You don't *have* to build it - though! this website is hosted via github pages - [you can find that here :)](https://jdsle.github.io/RSDK)
+
+###### TODO (?)
+###### - Give each engines their own IDBFS instance

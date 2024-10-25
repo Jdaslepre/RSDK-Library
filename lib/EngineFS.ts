@@ -1,5 +1,8 @@
 declare const FS: any;
+declare const PATH: any;
 declare const IDBFS: any;
+
+import JSZip from 'jszip';
 
 let once = false;
 
@@ -34,7 +37,7 @@ class EngineFS {
             FS.mount(IDBFS, {}, 'FileSystem');
 
             await this.Init();
-            
+
             console.log('FileSystem initialized');
             once = true;
         } catch (errorInit: any) {
@@ -125,7 +128,7 @@ class EngineFS {
             }
             await this.DirCopyRecursive(src, dst);
             return;
-        } 
+        }
         FS.writeFile(dst, FS.readFile(src));
     }
 
@@ -159,8 +162,8 @@ class EngineFS {
                     await this.ItemDoCopy(item, oldPath, newPath);
                 }
             } catch (error) {
-                alert('Error during paste operation for ' + item.name + ':' + error);
-                console.error(`Error during paste operation for ${item.name}:`, error);
+                alert('Error pasting ' + item.name + ':' + error);
+                console.error(`Error pasting ${item.name}:`, error);
                 this.actionInProgress = false;
             }
         });
@@ -211,52 +214,118 @@ class EngineFS {
         }
     }
 
+    async ZipExtract(file: File, fsPath: string): Promise<void> {
+        return new Promise<void>(async (resolve, reject) => {
+            try {
+                const zip = await JSZip.loadAsync(file);
+                console.log("Loaded ZIP file");
+
+                // Setting some stuff up, just get the info about the zip
+                const directoryList: string[] = [];
+                const fileList: { path: string; entry: JSZip.JSZipObject }[] = [];
+
+                zip.forEach((i, zentry) => {
+                    const fullPath = `${fsPath}/${i}`;
+                    if (zentry.dir) {
+                        directoryList.push(fullPath);
+                    } else {
+                        fileList.push({ path: fullPath, entry: zentry });
+                    }
+                });
+
+                // Make the directories first, before adding files to them
+                // reason for this should be obvious!
+                directoryList.forEach(dirPath => {
+                    const parts = dirPath.split('/');
+                    let currentPath = parts.shift() || '';
+
+                    parts.forEach(part => {
+                        currentPath += `/${part}`;
+                        if (!FS.analyzePath(currentPath).exists) {
+                            FS.mkdir(currentPath);
+                        }
+                    });
+                });
+
+                // Now, we can start working on the files...
+                await Promise.all(fileList.map(async ({ path, entry }) => {
+                    const data = await entry.async('uint8array');
+                    const p = PATH.dirname(path);
+
+                    // If the requested directory doesn't exist (SOMEHOW), make it
+                    if (!FS.analyzePath(p).exists) {
+                        FS.mkdir(p);
+                    }
+
+                    FS.writeFile(path, data, { encoding: 'binary' });
+                }));
+
+                console.log('Zip extraction complete! Synchronizing FileSystem...');
+                await this.Save();
+                this.actionInProgress = false;
+                resolve();
+            } catch (error) {
+                console.error("Error during ZIP extraction:", error);
+                reject(error);
+            }
+        });
+    }
+
     // -----
     // Files
     // -----
 
-    // TODO: ZIP EXTRACTION
     async FileUpload() {
         return new Promise<void>((resolve, reject) => {
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.multiple = true;
-
+    
             const self = this;
-
+    
             fileInput.onchange = async () => {
                 if (fileInput.files!.length > 0) {
                     self.actionInProgress = true;
                     const totalFiles = fileInput.files!.length;
-
+    
                     for (let i = 0; i < totalFiles; i++) {
                         const file = fileInput.files![i];
+                        const fileName = file.name.toLowerCase();
                         const filePath = `${this.currentPath}/${file.name}`;
-
-                        const reader = new FileReader();
-                        reader.onload = async function (event) {
-                            const fileData = new Uint8Array(event.target!.result as ArrayBuffer);
-                            FS.writeFile(filePath, fileData, { encoding: 'binary' });
-
-                            self.actionProgress = Math.round(((i + 1) / totalFiles) * 100);
-                            console.log(`Upload Progress: ${self.actionProgress}%`);
-
-                            await new Promise(resolve => setTimeout(resolve, 0));
-
-                            if (i === totalFiles - 1) {
-                                FS.syncfs(function (err: any) {
-                                    if (err) {
-                                        alert('Error syncing FS: ' + err);
-                                        console.error('Error syncing FS:', err);
-                                    } else {
-                                        self.actionInProgress = false;
-                                    }
-                                    resolve();
-                                });
+    
+                        if (fileName.endsWith('.zip')) {
+                            try {
+                                await self.ZipExtract(file, this.currentPath);
+                                resolve();
+                            } catch (error) {
+                                alert('Error extracting ZIP file: ' + error);
+                                console.error('Error extracting ZIP file:', error);
                             }
-                        };
-
-                        reader.readAsArrayBuffer(file);
+                        } else {
+                            const reader = new FileReader();
+                            reader.onload = async function (event) {
+                                const fileData = new Uint8Array(event.target!.result as ArrayBuffer);
+                                FS.writeFile(filePath, fileData, { encoding: 'binary' });
+    
+                                self.actionProgress = Math.round(((i + 1) / totalFiles) * 100);
+                                console.log(`Upload Progress: ${self.actionProgress}%`);
+    
+                                await new Promise(resolve => setTimeout(resolve, 0));
+    
+                                if (i === totalFiles - 1) {
+                                    FS.syncfs(function (err: any) {
+                                        if (err) {
+                                            alert('Error syncing FS: ' + err);
+                                            console.error('Error syncing FS:', err);
+                                        } else {
+                                            self.actionInProgress = false;
+                                        }
+                                        resolve();
+                                    });
+                                }
+                            };
+                            reader.readAsArrayBuffer(file);
+                        }
                     }
                 } else {
                     reject('No files selected');
@@ -266,13 +335,41 @@ class EngineFS {
         });
     }
 
-    async FileDownload(path: string) {
+    async FileDownload(paths: string[]) {
         try {
-            const blob = new Blob([FS.readFile(path)], { type: 'application/octet-stream' });
+            const zip = new JSZip();
 
+            const ZipFile = async (path: string, zipPath: string) => {
+                if (!FS.lookupPath(path).node) {
+                    console.warn(`Tried to add ${path} to zip for export. Doesn't exist!`);
+                    return;
+                }
+
+                if (this.DirCheck(path)) {
+                    const files = FS.readdir(path);
+                    for (const file of files) {
+                        // these are invalid
+                        if (file === '.' || file === '..') continue;
+
+                        const filePath = `${path}/${file}`;
+                        const zipFilePath = `${zipPath}/${file}`;
+
+                        await ZipFile(filePath, zipFilePath);
+                    }
+                } else {
+                    const fileData = FS.readFile(path);
+                    zip.file(zipPath, fileData);
+                }
+            };
+
+            for (const i of paths) {
+                await ZipFile(i, i.split('/').pop()!);
+            }
+
+            const content = await zip.generateAsync({ type: 'blob' });
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = path.split('/').pop() || 'download';
+            link.href = URL.createObjectURL(content);
+            link.download = 'export.zip';
 
             document.body.appendChild(link);
             link.click();
@@ -282,8 +379,8 @@ class EngineFS {
                 URL.revokeObjectURL(link.href);
             }, 100);
         } catch (error: any) {
-            alert('Error downloading file: ' + error);
-            console.error('Error downloading file:', error);
+            alert('Error downloading files: ' + error);
+            console.error('Error downloading files:', error);
             throw error;
         }
     }
@@ -385,12 +482,12 @@ class EngineFS {
         if (!window.confirm(`Are you sure you want to reset the FileSystem?\nJust making sure.`)) {
             return;
         }
-    
+
         // warned you twice, anything that happens after this is your fault
 
         try {
             const fsPath = '//FileSystem';
-    
+
             if (this.DirCheck(fsPath)) {
                 this.ResetFSLogic(fsPath);
                 await this.Save();
