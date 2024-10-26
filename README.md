@@ -4,12 +4,13 @@
 Website source code for RSDK-Library
 
 ## Known issues
-* Uploading files *might* just hang. This can be caused by having an insufficient amount of disk space available.
+* Uploading files *might* just hang. This can be caused by having an insufficient amount of disk space available. Both locally, and in-browser (IDBFS has a limit)
 
 ## Building
 ###### [(You're gonna need node.js for this.)](https://nodejs.org/en/download/package-manager)
-##### Simply run this command, and you should be good to go -
+##### Simply run these two commands, and you should be good to go -
 ```
+npm install
 npm run build
 ```
 

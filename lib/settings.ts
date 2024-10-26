@@ -6,7 +6,6 @@
 
 export interface ISettings {
     enablePlus: boolean;
-    enableConsole: boolean;
     deviceProfile: string;
 }
 
@@ -14,7 +13,6 @@ const SETTINGS_KEY = 'settings';
 
 const defaultSettings: ISettings = {
     enablePlus: false,
-    enableConsole: false,
     deviceProfile: 'desktop',
 };
 

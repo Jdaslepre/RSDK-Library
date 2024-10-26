@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --font-sans: 'GeistSans', 
-  --font-mono:
+  --font-sans: 'GeistSans',
+    --font-mono:
 }
 
 body {
@@ -13,6 +13,33 @@ body {
 
 code {
   font-family: var(--font-mono), monospace;
+}
+
+.enginePage {
+  background-color: #000000;
+  color: var(--text-color-light);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.engineSplash {
+  z-index: 10;
+  transition: opacity 0.083s linear;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* The canvas *must not* have any border or padding, or mouse coords will be wrong */
+.engineCanvas {
+  background-color: black;
+  border: 0px none;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 @layer utilities {
@@ -49,22 +76,23 @@ code {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
     --sidebar-background:
-  0 0% 98%;
+      0 0% 98%;
     --sidebar-foreground:
-  240 5.3% 26.1%;
+      240 5.3% 26.1%;
     --sidebar-primary:
-  240 5.9% 10%;
+      240 5.9% 10%;
     --sidebar-primary-foreground:
-  0 0% 98%;
+      0 0% 98%;
     --sidebar-accent:
-  240 4.8% 95.9%;
+      240 4.8% 95.9%;
     --sidebar-accent-foreground:
-  240 5.9% 10%;
+      240 5.9% 10%;
     --sidebar-border:
-  220 13% 91%;
+      220 13% 91%;
     --sidebar-ring:
-  217.2 91.2% 59.8%;
+      217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -91,21 +119,21 @@ code {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     --sidebar-background:
-  240 5.9% 10%;
+      240 5.9% 10%;
     --sidebar-foreground:
-  240 4.8% 95.9%;
+      240 4.8% 95.9%;
     --sidebar-primary:
-  224.3 76.3% 48%;
+      224.3 76.3% 48%;
     --sidebar-primary-foreground:
-  0 0% 100%;
+      0 0% 100%;
     --sidebar-accent:
-  240 3.7% 15.9%;
+      240 3.7% 15.9%;
     --sidebar-accent-foreground:
-  240 4.8% 95.9%;
+      240 4.8% 95.9%;
     --sidebar-border:
-  240 3.7% 15.9%;
+      240 3.7% 15.9%;
     --sidebar-ring:
-  217.2 91.2% 59.8%;
+      217.2 91.2% 59.8%;
   }
 }
 
@@ -113,6 +141,7 @@ code {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

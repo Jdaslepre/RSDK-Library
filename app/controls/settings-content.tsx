@@ -34,7 +34,6 @@ import { z } from 'zod';
 const FormSchema = z.object({
     theme: z.enum(['auto', 'light', 'dark']).default('auto').optional(),
     enablePlus: z.boolean().default(false).optional(),
-    enableConsole: z.boolean().default(false).optional(),
     deviceProfile: z.string().default('desktop').optional(),
 });
 
@@ -104,7 +103,6 @@ export function SettingsContent() {
         resolver: zodResolver(FormSchema),
         defaultValues: {
             enablePlus: instSettings.enablePlus ?? false,
-            enableConsole: instSettings.enableConsole ?? false,
             deviceProfile: instSettings.deviceProfile,
         },
     });
@@ -112,7 +110,6 @@ export function SettingsContent() {
     const actionSave = (data: z.infer<typeof FormSchema>) => {
         const settingsToSave: Settings.ISettings = {
             enablePlus: data.enablePlus ?? false,
-            enableConsole: data.enableConsole ?? false,
             deviceProfile: data.deviceProfile || 'desktop',
         };
 
@@ -146,30 +143,6 @@ export function SettingsContent() {
                                             onCheckedChange={(checked) => {
                                                 field.onChange(checked);
                                                 actionSave({ ...form.getValues(), enablePlus: checked });
-                                            }}
-                                        />
-                                    </Form.FormControl>
-                                </Form.FormItem>
-                            )}
-                        />
-
-                        <Form.FormField
-                            control={form.control}
-                            name='enableConsole'
-                            render={({ field }) => (
-                                <Form.FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                                    <div className='space-y-0.5'>
-                                        <Form.FormLabel>Enable Console</Form.FormLabel>
-                                        <Form.FormDescription>
-                                            Enables the emscripten console for the engines
-                                        </Form.FormDescription>
-                                    </div>
-                                    <Form.FormControl>
-                                        <Switch
-                                            checked={field.value}
-                                            onCheckedChange={(checked) => {
-                                                field.onChange(checked);
-                                                actionSave({ ...form.getValues(), enableConsole: checked });
                                             }}
                                         />
                                     </Form.FormControl>
