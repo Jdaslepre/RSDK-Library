@@ -28,4 +28,5 @@ python -m http.server
 ###### You don't *have* to build it - though! this website is hosted via github pages - [you can find that here :)](https://jdsle.github.io/RSDK)
 
 ###### TODO (?)
-###### - Give each engines their own IDBFS instance
+###### - Give each engines their own IDBFS instance (done)
+###### - Prevent engine file nav when file operation is in progress

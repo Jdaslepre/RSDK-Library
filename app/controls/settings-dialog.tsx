@@ -47,7 +47,7 @@ export function SettingsDialog() {
                 <Dialog.Dialog open={open} onOpenChange={setOpen}>
                     <Dialog.DialogTrigger asChild>
                         <Sidebar.SidebarMenuButton asChild>
-                            <a>
+                            <a href='#'>
                                 <Icons.Settings2 />
                                 <span>Settings</span>
                             </a>
@@ -65,7 +65,7 @@ export function SettingsDialog() {
                 <Drawer.Drawer open={open} onOpenChange={setOpen}>
                     <Drawer.DrawerTrigger asChild>
                         <Sidebar.SidebarMenuButton asChild>
-                            <a>
+                            <a href='#'>
                                 <Icons.Settings2 />
                                 <span>Settings</span>
                             </a>

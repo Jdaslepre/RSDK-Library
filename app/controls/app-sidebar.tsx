@@ -23,11 +23,11 @@ import { SettingsDialog } from '@/app/controls/settings-dialog';
 // ---------------------
 
 const EngineList = [
-    { title: 'RSDKv2', url: '#', icon: './assets/RSDKGeneric.png' },
-    { title: 'RSDKv3', url: '#', icon: './assets/RSDKv3.png' },
-    { title: 'RSDKv4', url: '#', icon: './assets/RSDKv4.png' },
-    { title: 'RSDKv5', url: '#', icon: './assets/RSDKv5.png' },
-    { title: 'RSDKv5U', url: '#', icon: './assets/RSDKv5U.png' }
+    { title: 'RSDKv2', url: 'rsdkv2', icon: './assets/RSDKGeneric.png' },
+    { title: 'RSDKv3', url: 'rsdkv3', icon: './assets/RSDKv3.png' },
+    { title: 'RSDKv4', url: 'rsdkv4', icon: './assets/RSDKv4.png' },
+    { title: 'RSDKv5', url: 'rsdkv5', icon: './assets/RSDKv5.png' },
+    { title: 'RSDKv5U', url: 'rsdkv5u', icon: './assets/RSDKv5U.png' }
 ];
 
 const Resources = [
@@ -78,12 +78,13 @@ const DropdownHeader = () => (
     </Dropdown.DropdownMenu>
 );
 
-const EnginesCollapsible = () => (
+const EnginesCollapsible: React.FC<Props> = ({ onNavigate }) => (
     <Collapsible.Collapsible defaultOpen className='group/collapsible'>
         <Sidebar.SidebarGroup>
             <Sidebar.SidebarGroupLabel asChild>
-                <Collapsible.CollapsibleTrigger>
-                    Engines
+                <Collapsible.CollapsibleTrigger className='gap-2'>
+                    <Icons.FolderClosed />
+                    <span className='truncate font-semibold'>Engine Files</span>
                     <Icons.ChevronDown className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180' />
                 </Collapsible.CollapsibleTrigger>
             </Sidebar.SidebarGroupLabel>
@@ -92,7 +93,7 @@ const EnginesCollapsible = () => (
                     {EngineList.map((item) => (
                         <Sidebar.SidebarMenuItem key={item.title}>
                             <Sidebar.SidebarMenuButton asChild>
-                                <a href={item.url}>
+                                <a href='#' onClick={() => onNavigate(item.url)}>
                                     <img src={item.icon} alt='engine logo' width={16} height={16} />
                                     <span>{item.title}</span>
                                 </a>
@@ -107,7 +108,7 @@ const EnginesCollapsible = () => (
 
 export function AppSidebar({ onNavigate, ...props }: Props) {
     return (
-        <Sidebar.Sidebar collapsible='icon' {...props}>
+        <Sidebar.Sidebar {...props}>
             <Sidebar.SidebarHeader>
                 <Sidebar.SidebarMenu>
                     <Sidebar.SidebarMenuItem>
@@ -131,19 +132,9 @@ export function AppSidebar({ onNavigate, ...props }: Props) {
                     <Sidebar.SidebarSeparator />
 
                     {/* RSDK Engines */}
-                    <EnginesCollapsible />
+                    <EnginesCollapsible onNavigate={onNavigate} />
 
                     <Sidebar.SidebarSeparator />
-
-                    {/* Files Item */}
-                    <Sidebar.SidebarGroup>
-                        <Sidebar.SidebarMenuButton onClick={() => onNavigate('files')} asChild>
-                            <a href='#'>
-                                <Icons.FolderClosed />
-                                <span>Files</span>
-                            </a>
-                        </Sidebar.SidebarMenuButton>
-                    </Sidebar.SidebarGroup>
 
                 </Sidebar.SidebarMenu>
             </Sidebar.SidebarContent>

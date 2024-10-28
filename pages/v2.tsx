@@ -48,7 +48,6 @@ export default function V2() {
                 </div>
                 <canvas className='engineCanvas' id='canvas' />
             </ThemeProvider>
-            <Script src='./lib/Emscripten.js' />
             <Script src='./lib/RSDKv2.js' />
             <Script src='./modules/RSDKv2.js' />
         </div>

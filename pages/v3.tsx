@@ -48,7 +48,6 @@ export default function V3() {
                 </div>
                 <canvas className='engineCanvas' id='canvas' />
             </ThemeProvider>
-            <Script src='./lib/Emscripten.js' />
             <Script src='./lib/RSDKv3.js' />
             <Script src='./modules/RSDKv3.js' />
         </div>

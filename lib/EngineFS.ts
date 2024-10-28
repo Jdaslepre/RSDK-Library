@@ -6,6 +6,7 @@ import JSZip from 'jszip';
 
 import { PathLike } from 'fs';
 import { any } from 'zod';
+import { root } from 'postcss';
 
 // ------------------
 // Global Definitions
@@ -34,8 +35,9 @@ class EngineFS {
     // --------------------
 
     private static configured: boolean = false;
+    private static activeMount: string | null = null;
 
-    public static fspath: string = "/FileSystem";
+    public static fspath: string = "//FileSystem";
 
     private static clipboard: { items: FileItem[], isCut: boolean } | null = null;
     public static actionInProgress: boolean = false;
@@ -46,14 +48,32 @@ class EngineFS {
     // --------------------
 
     public static async Init(id: string) {
-        return new Promise(async (resolve: any, reject) => {
-            if (EngineFS.configured === true) return;
+        return new Promise<void>(async (resolve, reject) => {
+            // if (EngineFS.configured) return resolve();
 
+            if (EngineFS.activeMount) {
+                await EngineFS.Unmount(EngineFS.activeMount);
+            }
+
+            if (!FS.analyzePath(`/${id}`).exists)
             FS.mkdir(id);
-            FS.mount(IDBFS, {}, id);
+            FS.mount(IDBFS, { root: `/${id}` }, id);
             await EngineFS.SyncInit();
-
             EngineFS.configured = true;
+            EngineFS.activeMount = id;
+
+            EngineFS.fspath = `/${id}`
+
+            resolve();
+        });
+    }
+
+    private static async Unmount(id: string) {
+        return new Promise<void>((resolve) => {
+            FS.unmount(id);
+            if (EngineFS.activeMount === id) {
+                EngineFS.activeMount = null; 
+            }
             resolve();
         });
     }
@@ -62,10 +82,9 @@ class EngineFS {
         return new Promise<void>((resolve, reject) => {
             FS.syncfs(true, function (error: any) {
                 if (error) {
-                    EngineFS.AlertError(`EngineFS.Save Error: ${error}`);
+                    EngineFS.AlertError(`EngineFS.SyncInit Error: ${error}`);
                     reject(error);
                 } else {
-                    console.log('Synchronized FS');
                     resolve();
                 }
             });
@@ -200,10 +219,11 @@ class EngineFS {
         return FS.isDir(mode);
     }
 
-    public static DirectoryCreate(name: PathLike) {
+    public static async DirectoryCreate(name: PathLike) {
         try {
             const dstPath: PathLike = `${EngineFS.fspath}/${name}`;
             FS.mkdir(dstPath);
+            await EngineFS.Save();
             console.log(`EngineFS.DirectoryCreate: Created ${dstPath}`);
         } catch (error) {
             EngineFS.AlertError(`EngineFS.DirectoryCreate Error: ${error}`);
