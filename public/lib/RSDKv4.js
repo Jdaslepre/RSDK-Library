@@ -1,6 +1,6 @@
 var Module = {
     onRuntimeInitialized: function () {
-        TS_InitFS('RSDKv3',
+        TS_InitFS('RSDKv4',
             function () {
                 console.log('EngineFS initialized');
                 const splash = document.getElementById("splash");
@@ -60,7 +60,7 @@ window.onerror = () => {
 };
 
 function RSDK_Init() {
-    FS.chdir('/RSDKv3');
+    FS.chdir('/RSDKv4');
 
     const storedSettings = localStorage.getItem('settings');
     if (storedSettings) {
@@ -68,7 +68,13 @@ function RSDK_Init() {
 
         // value, index
         // index 0 - plus
+        // index 1 - device profile
         _RSDK_Configure(settings.enablePlus, 0);
+
+        if (settings.deviceProfile === "desktop")
+            _RSDK_Configure(0, 1);
+        else if (settings.deviceProfile === "mobile")
+            _RSDK_Configure(1, 1);
     }
 
     _RSDK_Initialize();
