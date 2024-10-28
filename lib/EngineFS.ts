@@ -2,11 +2,8 @@
 // Library Imports
 // ---------------
 
-import JSZip from 'jszip';
-
 import { PathLike } from 'fs';
-import { any } from 'zod';
-import { root } from 'postcss';
+import JSZip from 'jszip';
 
 // ------------------
 // Global Definitions
@@ -34,7 +31,6 @@ class EngineFS {
     // Variable Definitions
     // --------------------
 
-    private static configured: boolean = false;
     private static activeMount: string | null = null;
 
     public static fspath: string = "//FileSystem";
@@ -49,21 +45,15 @@ class EngineFS {
 
     public static async Init(id: string) {
         return new Promise<void>(async (resolve, reject) => {
-            // if (EngineFS.configured) return resolve();
-
             if (EngineFS.activeMount) {
                 await EngineFS.Unmount(EngineFS.activeMount);
             }
-
             if (!FS.analyzePath(`/${id}`).exists)
-            FS.mkdir(id);
+                FS.mkdir(id);
             FS.mount(IDBFS, { root: `/${id}` }, id);
             await EngineFS.SyncInit();
-            EngineFS.configured = true;
             EngineFS.activeMount = id;
-
             EngineFS.fspath = `/${id}`
-
             resolve();
         });
     }
@@ -72,7 +62,7 @@ class EngineFS {
         return new Promise<void>((resolve) => {
             FS.unmount(id);
             if (EngineFS.activeMount === id) {
-                EngineFS.activeMount = null; 
+                EngineFS.activeMount = null;
             }
             resolve();
         });
@@ -105,83 +95,101 @@ class EngineFS {
         });
     }
 
-    // Logs an error to the console, along with showing a popup for it
-    private static AlertError(msg: string) {
+    public static AlertError(msg: string) {
         alert(msg);
         console.error(msg);
     }
 
-
-    // Uploads a file to the current directory
     public static async FileUpload() {
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.multiple = true;
-
-        fileInput.onchange = async () => {
-            if (fileInput.files!.length > 0) {
-                EngineFS.actionInProgress = true;
-                const totalFiles = fileInput.files!.length;
-
-                for (let i = 0; i < totalFiles; i++) {
-                    const file = fileInput.files![i];
-                    const fileName = file.name.toLowerCase();
-                    const filePath = `${EngineFS.fspath}/${file.name}`;
-
-                    if (fileName.endsWith('.zip')) {
-                        try {
-                            await EngineFS.ZipExtract(file, EngineFS.fspath);
-                        } catch (error) {
-                            alert('Error extracting ZIP file: ' + error);
-                            console.error('Error extracting ZIP file:', error);
-                        }
-                    } else {
-                        const reader = new FileReader();
-                        reader.onload = async function (event) {
-                            const fileData = new Uint8Array(event.target!.result as ArrayBuffer);
-                            FS.writeFile(filePath, fileData, { encoding: 'binary' });
-
-                            EngineFS.actionProgress = Math.round(((i + 1) / totalFiles) * 100);
-                            console.log(`Upload Progress: ${EngineFS.actionProgress}%`);
-
-                            await new Promise(resolve => setTimeout(resolve, 0));
-
-                            if (i === totalFiles - 1) {
-                                await EngineFS.Save();
-                                EngineFS.actionInProgress = false;
-                            }
-                        };
-                        reader.readAsArrayBuffer(file);
-                    }
-                }
-            } else {
-                console.warn('EngineFS.FileUpload: No files selected for upload');
-            }
-        };
-        fileInput.click();
+        return EngineFS.FileUploadDlg((files) => EngineFS.FileUploadCommon(files));
     }
 
-    // Downloads a file from {path}
-    // If multiple files, or a directory is selected, we will download them as a zip
+    public static async DropFileUpload(files: File[]) {
+        return EngineFS.FileUploadCommon(files);
+    }
+
+    private static async FileUploadDlg(callback: (files: FileList) => Promise<void>) {
+        return new Promise<void>((resolve, reject) => {
+            const _input = document.createElement('input');
+            _input.type = 'file';
+            _input.multiple = true;
+            _input.onchange = async () => {
+                if (!_input.files || !_input.files.length) {
+                    console.warn('EngineFS.FileUpload: No files selected for upload');
+                    reject();
+                    return;
+                }
+                try {
+                    await callback(_input.files);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            _input.click();
+        });
+    }
+
+    private static async FileUploadCommon(files: FileList | File[]) {
+        EngineFS.actionInProgress = true;
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const filePath = `${EngineFS.fspath}/${file.name}`;
+                if (file.name.toLowerCase().endsWith('.zip')) {
+                    await EngineFS.DoZipExtract(file);
+                } else {
+                    await EngineFS.DoFileWrite(file, filePath);
+                }
+                EngineFS.actionProgress = Math.round(((i + 1) / files.length) * 100);
+                console.log(`Upload Progress: ${EngineFS.actionProgress}%`);
+            }
+            await EngineFS.Save();
+        } finally {
+            EngineFS.actionInProgress = false;
+        }
+    }
+
+    private static async DoZipExtract(file: File) {
+        try {
+            await EngineFS.ZipExtract(file, EngineFS.fspath);
+        } catch (error) {
+            EngineFS.AlertError(`EngineFS.DoZipExtract Zip Error: ${error}`);
+            throw error;
+        }
+    }
+
+    private static async DoFileWrite(file: File, filePath: string) {
+        return new Promise<void>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    FS.writeFile(filePath, new Uint8Array(await file.arrayBuffer()), { encoding: 'binary' });
+                    resolve();
+                } catch (error) {
+                    EngineFS.AlertError(`EngineFS.DoFileWrite Error: ${error}`);
+                    reject(error);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
     public static async FileDownload(paths: string[]) {
         try {
             const zip = new JSZip();
-
             const ZipFile = async (path: string, zipPath: string) => {
                 if (!FS.lookupPath(path).node) {
                     console.warn(`Tried to add ${path} to zip for export. Doesn't exist!`);
                     return;
                 }
-
                 if (await EngineFS.DirectoryCheck(path)) {
                     const files = FS.readdir(path);
                     for (const file of files) {
                         // these are invalid
                         if (file === '.' || file === '..') continue;
-
                         const filePath = `${path}/${file}`;
                         const zipFilePath = `${zipPath}/${file}`;
-
                         await ZipFile(filePath, zipFilePath);
                     }
                 } else {
@@ -189,31 +197,25 @@ class EngineFS {
                     zip.file(zipPath, fileData);
                 }
             };
-
             for (const i of paths) {
                 await ZipFile(i, i.split('/').pop()!);
             }
-
             const content = await zip.generateAsync({ type: 'blob' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
             link.download = 'export.zip';
-
             document.body.appendChild(link);
             link.click();
-
             setTimeout(() => {
                 document.body.removeChild(link);
                 URL.revokeObjectURL(link.href);
             }, 100);
-        } catch (error: any) {
-            alert('Error downloading files: ' + error);
-            console.error('Error downloading files:', error);
+        } catch (error) {
+            EngineFS.AlertError(`EngineFS.FileDownload Error: ${error}`);
             throw error;
         }
     }
 
-    // Checks if an item at {path} is a directory
     public static async DirectoryCheck(path: PathLike) {
         const mode = FS.lookupPath(path).node.mode;
         return FS.isDir(mode);
@@ -231,16 +233,8 @@ class EngineFS {
         }
     }
 
-    public static async Cut(items: FileItem[]) {
-        EngineFS.clipboard = { items, isCut: true };
-        console.log('EngineFS.Cut: items -', items);
-    }
-
-    public static async Copy(items: FileItem[]) {
-        this.clipboard = { items, isCut: false };
-        console.log('EngineFS.Copy: items -', items);
-    }
-
+    public static async Cut(items: FileItem[]) { EngineFS.clipboard = { items, isCut: true }; }
+    public static async Copy(items: FileItem[]) { EngineFS.clipboard = { items, isCut: false }; }
     public static async Paste() {
         if (!EngineFS.clipboard) {
             console.warn('Clipboard is empty. No items to paste.');
@@ -254,8 +248,7 @@ class EngineFS {
             EngineFS.actionInProgress = true;
             try {
                 if (!FS.lookupPath(oldPath).node) {
-                    alert('Source path does not exist: ' + oldPath);
-                    console.error(`Source path does not exist: ${oldPath}`);
+                    EngineFS.AlertError(`EngineFS.Paste: Source path does not exist.`);
                     EngineFS.actionInProgress = false;
                     return;
                 }
@@ -266,8 +259,7 @@ class EngineFS {
                     await EngineFS.ItemDoCopy(item, oldPath, newPath);
                 }
             } catch (error) {
-                alert('Error pasting ' + item.name + ':' + error);
-                console.error(`Error pasting ${item.name}:`, error);
+                EngineFS.AlertError(`EngineFS.Paste Error: ${error}`);
                 EngineFS.actionInProgress = false;
             }
         });
@@ -277,7 +269,6 @@ class EngineFS {
         EngineFS.clipboard = null;
     }
 
-    // Renames {srcName} (can be file/directory) to {dstName}
     public static async Rename(srcName: string, dstName: string) {
         try {
             const srcPath = `${EngineFS.fspath}/${srcName}`;
@@ -319,10 +310,8 @@ class EngineFS {
         }
     }
 
-    // Returns a list of items contained in the currently directory
     public static async GetPathItems() {
         const files: FileItem[] = [];
-
         for (const name of FS.readdir(EngineFS.fspath)) {
             if (name === "." || name === "..") continue;
             const path = `${EngineFS.fspath}/${name}`;
@@ -332,7 +321,6 @@ class EngineFS {
                 isDirectory: await EngineFS.DirectoryCheck(path),
             });
         }
-
         return files;
     }
 
@@ -352,7 +340,6 @@ class EngineFS {
             srcP.every((part, index) => part === dstP[index]);
     }
 
-
     private static async ItemDoCopy(item: FileItem, src: string, dst: string) {
         if (EngineFS.CheckSubdir(EngineFS.PathNormalize(src), EngineFS.PathNormalize(dst))) {
             alert(`Whoa there!\nThe destination folder is a subfolder of the source folder`);
@@ -370,8 +357,6 @@ class EngineFS {
         FS.writeFile(dst, FS.readFile(src));
     }
 
-
-    // Extracts a selected ZIP file, via JZSip
     private static async ZipExtract(file: File, fsPath: string): Promise<void> {
         return new Promise<void>(async (resolve, reject) => {
             try {
@@ -454,8 +439,7 @@ class EngineFS {
                 }
             }));
         } catch (error) {
-            alert('Error copying directory from ' + src + ' to ' + dest + ': ' + error);
-            console.error(`Error copying directory from ${src} to ${dest}:`, error);
+            EngineFS.AlertError(`EngineFS.DirectoryCopyRecursive Error: ${error} - from ${src} -> ${dest}`);
         }
     }
 
@@ -478,57 +462,8 @@ class EngineFS {
             });
 
             FS.rmdir(path);
-        } catch (err) {
-            alert('Failed to delete directory: ' + err);
-            console.error('Failed to delete directory:', err);
-        }
-    }
-
-    public static async ResetFileSystem() {
-        if (!window.confirm(`Are you sure you want to reset the FileSystem?\n"Reset" as in, delete everything. This action is irreversible.`)) {
-            return;
-        }
-        if (!window.confirm(`Are you sure you want to reset the FileSystem?\nJust making sure.`)) {
-            return;
-        }
-
-        // warned you twice, anything that happens after this is your fault
-        try {
-            const fsPath = '//FileSystem';
-
-            if (await EngineFS.DirectoryCheck(fsPath)) {
-                EngineFS.ResetFSLogic(fsPath);
-                await EngineFS.Save();
-                console.log('FileSystem has been reset successfully.');
-            }
         } catch (error) {
-            alert('Error resetting FileSystem: ' + error);
-            console.error('Error resetting FileSystem:', error);
-            throw error;
-        }
-    }
-
-    private static ResetFSLogic(path: string) {
-        try {
-            const files: string[] = FS.readdir(path);
-
-            files.forEach((file: string) => {
-                if (file === '.' || file === '..') {
-                    return;
-                }
-                const filePath = path + '/' + file;
-                const stat = FS.stat(filePath);
-
-                if (FS.isDir(stat.mode)) {
-                    EngineFS.DirectoryDeleteRecursive(filePath);
-                } else if (FS.isFile(stat.mode)) {
-                    FS.unlink(filePath);
-                }
-            });
-
-        } catch (err) {
-            alert('Failed to delete directory: ' + err);
-            console.error('Failed to delete directory:', err);
+            EngineFS.AlertError(`EngineFS.DirectoryDeleteRecursive Error: ${error} - target -> ${path}`);
         }
     }
 
@@ -536,16 +471,12 @@ class EngineFS {
     private static CheckTextFile(fileName: string, content: Uint8Array): boolean {
         const textFileExtensions = ['.txt', '.json', '.md', '.csv', '.html'];
         const extension = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
-    
-        if (textFileExtensions.includes(extension)) {
+
+        if (textFileExtensions.includes(extension))
             return true;
-        }
-    
-        const isText = content.every(byte => (byte >= 32 && byte <= 126) || byte === 9 || byte === 10 || byte === 13);
-        
-        return isText;
+
+        return content.every(byte => (byte >= 32 && byte <= 126) || byte === 9 || byte === 10 || byte === 13);
     }
-    
 }
 
 export default EngineFS;

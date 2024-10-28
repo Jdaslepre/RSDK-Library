@@ -89,6 +89,9 @@ const FilesPage: React.FC<Props> = ({ id }) => {
         await DoRefresh();
     };
 
+    const [dragging, setDragging] = React.useState(false);
+
+
     // -------------------
     // Toolbar Item Events
     // -------------------
@@ -162,6 +165,35 @@ const FilesPage: React.FC<Props> = ({ id }) => {
     };
 
     const FileList_OnClick = () => setSelectedFiles([]);
+    const FileList_OnDragOver = (event: React.DragEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setDragging(true);
+    };
+    const FileList_OnDragEnter = (event: React.DragEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setDragging(true);
+    };
+    const FileList_OnDragLeave = (event: React.DragEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setDragging(false);
+    };
+    const FileList_OnDrop = async (event: React.DragEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setDragging(false);
+        const files = Array.from(event.dataTransfer.files);
+        if (files.length) {
+            try {
+                await EngineFS.DropFileUpload(files);
+                await DoRefresh();
+            } catch (error) {
+                EngineFS.AlertError(`files.FileList_OnDrop Upload Error: ${error}`);
+            }
+        }
+    };
 
     return (
         <div className='flex flex-col h-full'>
@@ -184,7 +216,7 @@ const FilesPage: React.FC<Props> = ({ id }) => {
                         <Tooltip.TooltipTrigger asChild>
                             <Button variant='outline' size='icon' onClick={async () => {
                                 await EngineFS.FileUpload();
-                                DoRefresh();
+                                await DoRefresh();
                             }}>
                                 <Icons.Upload />
                             </Button>
@@ -264,38 +296,18 @@ const FilesPage: React.FC<Props> = ({ id }) => {
                             <p>Delete selected item</p>
                         </Tooltip.TooltipContent>
                     </Tooltip.Tooltip>
-                    <Separator orientation='vertical' className='ml-2 mr-2 h-4' />
-                    <Dropdown.DropdownMenu>
-                        <Dropdown.DropdownMenuTrigger asChild>
-                            <Button variant='outline' size='icon'><Icons.Settings /></Button>
-                        </Dropdown.DropdownMenuTrigger>
-                        <Dropdown.DropdownMenuContent className="w-56">
-                            <Dropdown.DropdownMenuLabel>Options</Dropdown.DropdownMenuLabel>
-                            <Dropdown.DropdownMenuSeparator />
-                            <Dropdown.DropdownMenuGroup>
-
-                                {/* TODO: Zip */}
-                                <Dropdown.DropdownMenuItem>
-                                    <Icons.FolderArchive />
-                                    <span>Export FileSystem as .zip</span>
-                                </Dropdown.DropdownMenuItem>
-
-                                <Dropdown.DropdownMenuItem onClick={async () => {
-                                    await EngineFS.ResetFileSystem();
-                                    DoRefresh();
-                                }}>
-                                    <Icons.FolderClosed />
-                                    <span>Reset FileSystem</span>
-                                </Dropdown.DropdownMenuItem>
-
-                            </Dropdown.DropdownMenuGroup>
-                        </Dropdown.DropdownMenuContent>
-                    </Dropdown.DropdownMenu>
                 </Tooltip.TooltipProvider>
             </div>
 
             {/* File List Container */}
-            <div className='flex-1 mt-4 overflow-y-auto flex flex-col' onClick={FileList_OnClick}>
+            <div
+                className='flex-1 mt-4 overflow-y-auto flex flex-col'
+                onClick={FileList_OnClick}
+                onDragOver={FileList_OnDragOver}
+                onDragEnter={FileList_OnDragEnter}
+                onDragLeave={FileList_OnDragLeave}
+                onDrop={FileList_OnDrop}
+            >
                 {files.map((file, index) => (
                     <Toggle
                         key={index}
