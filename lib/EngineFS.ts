@@ -305,7 +305,7 @@ class EngineFS {
                     continue;
                 }
                 if (await EngineFS.DirectoryCheck(path)) {
-                    FS.rmdir(path);
+                    EngineFS.DirectoryDeleteRecursive(path);
                     console.log(`EngineFS.Delete: ${path} deleted`);
                 } else {
                     FS.unlink(path);
@@ -531,6 +531,21 @@ class EngineFS {
             console.error('Failed to delete directory:', err);
         }
     }
+
+    // Other misc stuff
+    private static CheckTextFile(fileName: string, content: Uint8Array): boolean {
+        const textFileExtensions = ['.txt', '.json', '.md', '.csv', '.html'];
+        const extension = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
+    
+        if (textFileExtensions.includes(extension)) {
+            return true;
+        }
+    
+        const isText = content.every(byte => (byte >= 32 && byte <= 126) || byte === 9 || byte === 10 || byte === 13);
+        
+        return isText;
+    }
+    
 }
 
 export default EngineFS;
