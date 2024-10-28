@@ -20,40 +20,64 @@ const HomePage: React.FC = () => {
         <div className='space-y-6'>
 
             <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
-                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full" onClick={() => {
-                    const siteUrl = window.location.origin + window.location.pathname;
-                    window.open(`${siteUrl}v2`, '_blank');
-                }}>
-                    <img src="./assets/RSDKGeneric.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
-                    <span className="flex-grow text-left">RSDKv2</span>
+                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full">
+                    <a
+                        href={`${window.location.origin}${window.location.pathname}v2`}
+                        className="flex items-center gap-4 w-full"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <img src="./assets/RSDKGeneric.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
+                        <span className="flex-grow text-left">RSDKv2</span>
+                    </a>
                 </Button>
-                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full" onClick={() => {
-                    const siteUrl = window.location.origin + window.location.pathname;
-                    window.open(`${siteUrl}v3`, '_blank');
-                }}>
-                    <img src="./assets/RSDKv3.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
-                    <span className="flex-grow text-left">RSDKv3</span>
+
+                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full">
+                    <a
+                        href={`${window.location.origin}${window.location.pathname}v3`}
+                        className="flex items-center gap-4 w-full"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <img src="./assets/RSDKv3.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
+                        <span className="flex-grow text-left">RSDKv3</span>
+                    </a>
                 </Button>
-                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full" onClick={() => {
-                    const siteUrl = window.location.origin + window.location.pathname;
-                    window.open(`${siteUrl}v4`, '_blank');
-                }}>
-                    <img src="./assets/RSDKv4.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
-                    <span className="flex-grow text-left">RSDKv4</span>
+
+                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full">
+                    <a
+                        href={`${window.location.origin}${window.location.pathname}v4`}
+                        className="flex items-center gap-4 w-full"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <img src="./assets/RSDKv4.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
+                        <span className="flex-grow text-left">RSDKv4</span>
+                    </a>
                 </Button>
-                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full" onClick={() => {
-                    const siteUrl = window.location.origin + window.location.pathname;
-                    window.open(`${siteUrl}v5`, '_blank');
-                }}>
-                    <img src="./assets/RSDKv5.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
-                    <span className="flex-grow text-left">RSDKv5</span>
+
+                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full">
+                    <a
+                        href={`${window.location.origin}${window.location.pathname}v5`}
+                        className="flex items-center gap-4 w-full"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <img src="./assets/RSDKv5.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
+                        <span className="flex-grow text-left">RSDKv5</span>
+                    </a>
                 </Button>
-                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full" onClick={() => {
-                    const siteUrl = window.location.origin + window.location.pathname;
-                    window.open(`${siteUrl}/v5U`, '_blank');
-                }}>
-                    <img src="./assets/RSDKv5U.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
-                    <span className="flex-grow text-left">RSDKv5U</span>
+
+                <Button variant="outline" className="flex items-center gap-4 h-16 font-bold w-full">
+                    <a
+                        href={`${window.location.origin}${window.location.pathname}v5U`}
+                        className="flex items-center gap-4 w-full"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <img src="./assets/RSDKv5.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
+                        <span className="flex-grow text-left">RSDKv5U</span>
+                    </a>
                 </Button>
             </div>
 
