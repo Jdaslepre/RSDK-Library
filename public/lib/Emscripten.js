@@ -1,25 +1,13 @@
 var Module = {
     onRuntimeInitialized: function () {
-        FS.mkdir('FileSystem');
-        FS.mount(IDBFS, { autoPersist: true }, 'FileSystem');
-
-        FS.syncfs(true, function (err) {
-            if (err) {
-                alert('Error syncing FS: ' + err);
-                console.error('Error syncing FS:', err);
-                reject(err);
-            } else {
+        TS_InitFS('FileSystem',
+            function () {
+                console.log('EngineFS initialized');
                 const splash = document.getElementById("splash");
                 splash.style.opacity = 0;
-
-                setTimeout(() => {
-                    splash.remove();
-                }, 1000);
-
-                console.log('FileSystem initialized');
+                setTimeout(() => { splash.remove(); }, 1000);
                 RSDK_Init();
-            }
-        });
+            });
     },
     print: (function () {
         var element = document.getElementById('output');
@@ -36,12 +24,7 @@ var Module = {
     })(),
     canvas: (() => {
         var canvas = document.getElementById('canvas');
-
-        // As a default initial behavior, pop up an alert when the webgl context is lost.
-        // To make your application robust, you may want to override this behavior before shipping!
-        // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
         canvas.addEventListener("webglcontextlost", (e) => { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
-
         return canvas;
     })(),
     setStatus: (text) => {
@@ -56,6 +39,8 @@ var Module = {
         if (m) {
             text = m[1];
         }
+
+        console.log(text);
 
         // statusElement.innerHTML = text;
     },

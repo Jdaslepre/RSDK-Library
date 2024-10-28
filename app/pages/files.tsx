@@ -34,7 +34,6 @@ import { useBreadcrumb } from '@/app/controls/breadcrumb';
 // ---------------------
 
 const FilesPage: React.FC = () => {
-    const engineFS = React.useRef(new EngineFS()).current;
     const { AddNode, ResetNodes } = useBreadcrumb();
 
     const [files, setFiles] = React.useState<FileItem[]>([]);
@@ -46,31 +45,31 @@ const FilesPage: React.FC = () => {
     const joinPath = (...parts: string[]): string => parts.join('/').replace(/\/+/g, '/');
 
     const DoRefresh = async () => {
-        const entries = await engineFS.RetPathItems();
+        const entries = await EngineFS.GetPathItems();
         setFiles(entries);
-        UpdateBreadcrumb(engineFS.currentPath);
+        UpdateBreadcrumb(EngineFS.fspath);
     };
 
     React.useEffect(() => {
         const loadFiles = async () => {
             try {
-                await engineFS.Initialize();
+                await EngineFS.Init('FileSystem');
                 await DoRefresh();
             } catch (error) {
                 console.error('Error loading files:', error);
             }
         };
         loadFiles();
-    }, [engineFS]);
+    }, []);
 
     React.useEffect(() => {
         const interval = setInterval(() => {
-            setActionFinished(engineFS.actionInProgress);
-            setActionProgress(engineFS.actionProgress);
+            setActionFinished(EngineFS.actionInProgress);
+            setActionProgress(EngineFS.actionProgress);
         }, 100);
 
         return () => clearInterval(interval);
-    }, [engineFS]);
+    }, []);
 
     const UpdateBreadcrumb = (path: string) => {
         const parts = path.split('/').filter(Boolean);
@@ -82,7 +81,7 @@ const FilesPage: React.FC = () => {
     };
 
     const ChangeDir = async (path: string) => {
-        engineFS.currentPath = path;
+        EngineFS.fspath = path;
         await DoRefresh();
     };
 
@@ -93,7 +92,7 @@ const FilesPage: React.FC = () => {
     const Toolbar_NewFolder_OnClick = async () => {
         const name = prompt('Folder name:');
         if (name) {
-            await engineFS.DirCreate(name);
+            EngineFS.DirectoryCreate(name);
             await DoRefresh();
         }
     };
@@ -102,20 +101,20 @@ const FilesPage: React.FC = () => {
         if (selectedFiles.length === 0) {
             return;
         }
-        const paths = selectedFiles.map(file => joinPath(engineFS.currentPath, file));
-        await engineFS.FileDownload(paths);
+        const paths = selectedFiles.map(file => joinPath(EngineFS.fspath, file));
+        await EngineFS.FileDownload(paths);
     };
 
     const Toolbar_ItemCut_OnClick = async () => {
         const selectedItems = files.filter(file => selectedFiles.includes(file.name));
-        await engineFS.ItemCut(selectedItems);
+        await EngineFS.Cut(selectedItems);
     };
     const Toolbar_ItemCopy_OnClick = async () => {
         const selectedItems = files.filter(file => selectedFiles.includes(file.name));
-        await engineFS.ItemCopy(selectedItems);
+        await EngineFS.Copy(selectedItems);
     };
     const Toolbar_ItemPaste_OnClick = async () => {
-        await engineFS.ItemPaste();
+        await EngineFS.Paste();
         await DoRefresh();
     };
 
@@ -128,7 +127,7 @@ const FilesPage: React.FC = () => {
         const nameRen = prompt('New item name:', name);
         if (nameRen && nameRen !== name) {
             try {
-                await engineFS.ItemRename(name, nameRen);
+                await EngineFS.Rename(name, nameRen);
                 await DoRefresh();
             } catch (error) {
                 console.error('Error renaming item:', error);
@@ -137,7 +136,7 @@ const FilesPage: React.FC = () => {
     };
 
     const Toolbar_Delete_OnClick = async () => {
-        await engineFS.ItemDelete(selectedFiles);
+        await EngineFS.Delete(selectedFiles);
         await DoRefresh();
         setSelectedFiles([]);
     };
@@ -154,7 +153,7 @@ const FilesPage: React.FC = () => {
     };
     const FileItem_OnDblClick = async (file: FileItem) => {
         if (file.isDirectory) {
-            ChangeDir(joinPath(engineFS.currentPath, file.name));
+            ChangeDir(joinPath(EngineFS.fspath, file.name));
         }
     };
 
@@ -180,7 +179,7 @@ const FilesPage: React.FC = () => {
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
                             <Button variant='outline' size='icon' onClick={async () => {
-                                await engineFS.FileUpload();
+                                await EngineFS.FileUpload();
                                 DoRefresh();
                             }}>
                                 <Icons.Upload />
@@ -278,7 +277,7 @@ const FilesPage: React.FC = () => {
                                 </Dropdown.DropdownMenuItem>
 
                                 <Dropdown.DropdownMenuItem onClick={async () => {
-                                    await engineFS.ResetFileSystem();
+                                    await EngineFS.ResetFileSystem();
                                     DoRefresh();
                                 }}>
                                     <Icons.FolderClosed />
