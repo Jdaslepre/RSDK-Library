@@ -1,12 +1,12 @@
 import './globals.css';
 
-import type { Metadata } from 'next';
+import * as Next from 'next';
 import Script from 'next/script'
 
 import { GeistSans } from 'geist/font/sans'
 import { ThemeProvider } from '@/app/controls/theme-provider'
 
-export const metadata: Metadata = {
+export const metadata: Next.Metadata = {
     title: 'RSDK-Library',
     description: 'RSDK-Library website',
 };

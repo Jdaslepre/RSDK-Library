@@ -1,22 +1,25 @@
-'use client';
+'use client'
 
-import '@/app/globals.css';
-import * as React from 'react';
+import * as React from 'react'
+
+import '@/app/globals.css'
+import '@/app/engine.css'
 
 // --------------------
 // UI Component Imports
 // --------------------
 
-import Script from 'next/script';
+import Head from 'next/head'
+import Script from 'next/script'
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { ThemeProvider } from '@/app/controls/theme-provider';
+import { Skeleton } from "@/components/ui/skeleton"
+import { ThemeProvider } from '@/app/controls/theme-provider'
 
 // ---------------
 // Library Imports
 // ---------------
 
-import EngineFS from '@/lib/EngineFS';
+import EngineFS from '@/lib/EngineFS'
 
 // ---------------------
 // Component Definitions
@@ -35,21 +38,26 @@ export default function V3() {
     }, []);
 
     return (
-        <div className='enginePage'>
-            <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-                <div id='splash' className='engineSplash relative flex min-h-screen flex-col bg-background items-center justify-center'>
-                    <div className="flex flex-col space-y-3">
-                        <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-[250px]" />
-                            <Skeleton className="h-4 w-[200px]" />
+        <>
+            <Head>
+                <meta name='viewport' content='initial-scale=1, viewport-fit=cover' />
+            </Head>
+            <div className='enginePage'>
+                <ThemeProvider attribute='class' defaultTheme='dark' enableSystem>
+                    <div id='splash' className='engineSplash relative flex min-h-screen flex-col bg-background items-center justify-center'>
+                        <div className="flex flex-col space-y-3">
+                            <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-[250px]" />
+                                <Skeleton className="h-4 w-[200px]" />
+                            </div>
                         </div>
                     </div>
-                </div>
-                <canvas className='engineCanvas' id='canvas' />
-            </ThemeProvider>
-            <Script src='./lib/RSDKv3.js' />
-            <Script src='./modules/RSDKv3.js' />
-        </div>
+                    <canvas className='engineCanvas' id='canvas' />
+                </ThemeProvider>
+                <Script src='./lib/RSDKv3.js' />
+                <Script src='./modules/RSDKv3.js' />
+            </div>
+        </>
     )
 }
