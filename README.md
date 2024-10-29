@@ -3,31 +3,49 @@
 RSDK-Library is a collection of WebAssembly ports of RSDK Engine Decompilations.
 
 ## How to use
-* File Manager
-  * Each engine has their own file system. TODO: finish this
+**Starting engines**
+
+TODO: Write something about the home page.
+  
+The engines can also be accessed directly, via https://jdsle.github.io/RSDK/v{version}. for example, https://jdsle.github.io/RSDK/v5U
+
+> [!IMPORTANT]  
+> Don't forget about the files! RSDK-Library does not provide any game assets, so ensure that the engine has the necessary files required to start. (eg, Data.rsdk, Game.wasm)
+
+**File Manager**
+
+Each engine has their own file system. TODO: finish this
+
+**Settings**
+
+The settings page currently provides two options, a toggle for enabling the plus dlc (allowed as per the engine licenses), and a switch for the device profile. Don't get this page confused with Settings.ini
 
 ## Known issues
-* Uploading files *might* just hang. Uploading can take a while - so give it some time, before trying to reload the page.
+
+Uploading files *might* just hang. Uploading can take a while - so give it some time, before trying to reload the page.
 
 ## TODO
-###### - Give each engines their own IDBFS instance (done)
-###### - Prevent engine file nav when file operation is in progress
+
+Give each engines their own IDBFS instance (done)
+
+Prevent engine file nav when file operation is in progress
 
 ## Building the website
 ###### [(You're gonna need node.js for this.)](https://nodejs.org/en/download/package-manager)
-##### Simply run these two commands, and you should be good to go -
+Simply run these two commands, and you should be good to go -
 ```
 npm install
 npm run build
 ```
 
-##### This project is configured to output as a static site, after you build - it should be in (root)/out.
-##### To host it with npx, you can use this command from the root directory -
+This project is configured to output as a static site, after you build - it should be in (root)/out.
+
+To host it with npx, you can use this command from the root directory -
 ```
 npx serve@latest out
 ```
 
-##### or [if you'd like to use python](https://www.python.org/downloads/), you can host it by running this command in (root)/(output_dir)
+or [if you'd like to use python](https://www.python.org/downloads/), you can host it by running this command in (root)/(output_dir)
 ```
 python -m http.server
 ```
