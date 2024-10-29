@@ -2,7 +2,7 @@
 
 RSDK-Library is a collection of WebAssembly ports, of [RSDKModding's](https://github.com/RSDKModding) Decompilations.
 
-## How to use
+# How to use
 
 **Installing the site as a PWA (Progressive Web App)**
 
@@ -15,34 +15,34 @@ When installed, the site will launch in its own window, while appearing as a nat
 ![PWA Installed](/RepoAssets/ChromeInstalled.png)
 ###### "Native." lol
 
-**Starting engines**
+## Starting engines
 
 The home page contains links to the engines - but they can be accessed directly, via https://jdsle.github.io/RSDK/v{version}. for example, https://jdsle.github.io/RSDK/v5U
 
 > [!IMPORTANT]  
 > Don't forget about the files! RSDK-Library does not provide any game assets, so ensure that the engine has the necessary files required to start. (eg, Data.rsdk, Game.wasm)
 
-**Settings**
+## Settings
 
 The settings page currently provides two options -
 
-##### Enable Plus DLC
+#### Enable Plus DLC
 Allowed per engine licenses, this enables plus on supported engines. Those being RSDkv3, RSDKv4, and RSDKv5/U. Disabled by default.
 
-##### Device Profile
+#### Device Profile
 This option changes how the engine behaves. Desktop will act like a PC build of RSDK, Mobile - well, you get it. Desktop by default.
 ##### *Currently only supported by RSDkv4
 
-## Known issues
+# Known issues
 
 Uploading files *might* just hang. Uploading can take a while - so give it some time, before trying to reload the page.
 
-## TODO
+# TODO
 
 Prevent engine file nav when file operation is in progress
 
-## Building the website
-###### [(You're gonna need node.js for this.)](https://nodejs.org/en/download/package-manager)
+# Building the website
+#### [(You're gonna need node.js for this.)](https://nodejs.org/en/download/package-manager)
 Simply run these two commands, and you should be good to go -
 ```
 npm install
@@ -61,9 +61,7 @@ or [if you'd like to use python](https://www.python.org/downloads/), you can hos
 python -m http.server
 ```
 
-###### You don't *have* to build it - though! this website is hosted via github pages - [you can find that here :)](https://jdsle.github.io/RSDK)
-
-## Building the engines
+# Building the engines
 
 Each port has their own build instructions. You can learn how to build them by visiting their repositories:
 * [RSDK-Library-v2](https://github.com/Jdsle/RSDK-Library-v2)
@@ -73,5 +71,5 @@ Each port has their own build instructions. You can learn how to build them by v
 While not an engine - thought I'd include this here anyways
 * [RSDK-Library-FilesModule](https://github.com/Jdsle/RSDK-Library-FilesModule)
 
-## Building RSDKv5(U) Games for the Web
+# Building RSDKv5(U) Games for the Web
 TODO
