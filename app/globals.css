@@ -9,6 +9,10 @@
 
 body {
   font-family: var(--font-sans), sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 code {

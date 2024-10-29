@@ -437,7 +437,7 @@ class EngineFS {
                 console.log('Zip extraction complete! Synchronizing FileSystem...');
                 await EngineFS.Save();
                 EngineFS.actionInProgress = false;
-                toast(`Extracted zip ${file.name} to ${fsPath}.`);
+                toast(`Extracted ZIP ${file.name} to ${fsPath}.`);
                 resolve();
             } catch (error) {
                 EngineFS.AlertError(`EngineFS.ZipExtract Error: ${error}`);

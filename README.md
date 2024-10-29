@@ -1,12 +1,19 @@
-###### If you're looking for the engine source code, [that can be found here.](https://github.com/Jdsle/RSDK-Library-src) 
-## RSDK
+## RSDK-Library
 
-Website source code for RSDK-Library
+RSDK-Library is a collection of WebAssembly ports of RSDK Engine Decompilations.
+
+## How to use
+* File Manager
+  * Each engine has their own file system. TODO: finish this
 
 ## Known issues
-* Uploading files *might* just hang. This can be caused by having an insufficient amount of disk space available. Both locally, and in-browser (IDBFS has a limit)
+* Uploading files *might* just hang. Uploading can take a while - so give it some time, before trying to reload the page.
 
-## Building
+## TODO
+###### - Give each engines their own IDBFS instance (done)
+###### - Prevent engine file nav when file operation is in progress
+
+## Building the website
 ###### [(You're gonna need node.js for this.)](https://nodejs.org/en/download/package-manager)
 ##### Simply run these two commands, and you should be good to go -
 ```
@@ -27,6 +34,15 @@ python -m http.server
 
 ###### You don't *have* to build it - though! this website is hosted via github pages - [you can find that here :)](https://jdsle.github.io/RSDK)
 
-###### TODO (?)
-###### - Give each engines their own IDBFS instance (done)
-###### - Prevent engine file nav when file operation is in progress
+## Building the engines
+
+Each port has their own build instructions. You can learn how to build them by visiting their repositories:
+* [RSDK-Library-v2](https://github.com/Jdsle/RSDK-Library-v2)
+* [RSDK-Library-v3](https://github.com/Jdsle/RSDK-Library-v3)
+* [RSDK-Library-v4](https://github.com/Jdsle/RSDK-Library-v4)
+
+While not an engine - thought I'd include this here anyways
+* [RSDK-Library-FilesModule](https://github.com/Jdsle/RSDK-Library-FilesModule)
+
+## Building RSDKv5(U) Games for the Web
+TODO
