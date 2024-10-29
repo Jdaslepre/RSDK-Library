@@ -32,7 +32,6 @@ const EngineList = [
 
 const Resources = [
     { name: 'Website Source Code', url: 'https://github.com/Jdsle/RSDK', icon: Icons.Code2 },
-    { name: 'Engine Source Code', url: 'https://github.com/Jdsle/RSDK-Library-src', icon: Icons.Code2 },
     { name: 'RSDK-Modding Github', url: 'https://github.com/RSDKModding', icon: Icons.Globe },
     { name: 'RSDK-Modding Website', url: 'https://rsdkmodding.com', icon: Icons.Globe }
 ];

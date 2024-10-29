@@ -6,20 +6,21 @@ RSDK-Library is a collection of WebAssembly ports of the RSDK Decompilations, by
 
 **Installing the site as a PWA (Progressive Web App)**
 
+Upon visiting the site, you should see an install button appear.
+
+![PWA Installation Prompt](/RepoAssets/ChromeInstallPrompt.png)
+
+When installed, the site will launch in its own window, while appearing as a native application.
+
+![PWA Installed](/RepoAssets/ChromeInstalled.png)
+###### "Native." lol
+
 **Starting engines**
 
-TODO: Write something about the home page.
-  
-The engines can also be accessed directly, via https://jdsle.github.io/RSDK/v{version}. for example, https://jdsle.github.io/RSDK/v5U
-
+The home page contains links to the engines - but they can be accessed directly, via https://jdsle.github.io/RSDK/v{version}. for example, https://jdsle.github.io/RSDK/v5U
 
 > [!IMPORTANT]  
 > Don't forget about the files! RSDK-Library does not provide any game assets, so ensure that the engine has the necessary files required to start. (eg, Data.rsdk, Game.wasm)
-
-
-**File Manager**
-
-Each engine has their own file system. TODO: finish this
 
 **Settings**
 
@@ -29,7 +30,7 @@ The settings page currently provides two options -
 Allowed per engine licenses, this enables plus on supported engines. Those being RSDkv3, RSDKv4, and RSDKv5/U. Disabled by default.
 
 ##### Device Profile
-This option changes how the engine behaves. Desktop will act like a PC build of RSDK, Mobile - well. You get it. Desktop by default.
+This option changes how the engine behaves. Desktop will act like a PC build of RSDK, Mobile - well, you get it. Desktop by default.
 ##### *Currently only supported by RSDkv4
 
 ## Known issues
@@ -37,8 +38,6 @@ This option changes how the engine behaves. Desktop will act like a PC build of 
 Uploading files *might* just hang. Uploading can take a while - so give it some time, before trying to reload the page.
 
 ## TODO
-
-Give each engines their own IDBFS instance (done)
 
 Prevent engine file nav when file operation is in progress
 
