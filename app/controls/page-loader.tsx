@@ -13,7 +13,6 @@ const Start = (path: string) => {
             case 'rsdkv4': cache[path] = React.lazy(() => import('@/app/pages/rsdkv4')); break;
             case 'rsdkv5': cache[path] = React.lazy(() => import('@/app/pages/rsdkv5')); break;
             case 'rsdkv5u': cache[path] = React.lazy(() => import('@/app/pages/rsdkv5u')); break;
-            case 'files': cache[path] = React.lazy(() => import('@/app/pages/files')); break;
             default: cache[path] = React.lazy(() => import('@/app/pages/default')); break;
         }
     }
@@ -43,12 +42,11 @@ const PageLoader: React.FC<Props> = ({ path, setCurrentPath }) => {
 
             switch (path) {
                 case 'home': AddNode('Home', '/'); break;
-                case 'rsdkv2': AddNode('RSDKv2 Files', '/'); break;
-                case 'rsdkv3': AddNode('RSDKv3 Files', '/'); break;
-                case 'rsdkv4': AddNode('RSDKv4 Files', '/'); break;
-                case 'rsdkv5': AddNode('RSDKv5 Files', '/'); break;
-                case 'rsdkv5u': AddNode('RSDKv5U Files', '/'); break;
-                case 'files': AddNode('Files', '/files'); break;
+                case 'rsdkv2': AddNode('RSDKv2', '/'); break;
+                case 'rsdkv3': AddNode('RSDKv3', '/'); break;
+                case 'rsdkv4': AddNode('RSDKv4', '/'); break;
+                case 'rsdkv5': AddNode('RSDKv5', '/'); break;
+                case 'rsdkv5u': AddNode('RSDKv5U', '/'); break;
                 default: break;
             }
         }
