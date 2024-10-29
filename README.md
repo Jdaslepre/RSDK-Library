@@ -1,16 +1,21 @@
 ## RSDK-Library
 
-RSDK-Library is a collection of WebAssembly ports of RSDK Engine Decompilations.
+RSDK-Library is a collection of WebAssembly ports of the RSDK Decompilations, by [RSDKModding.](https://github.com/RSDKModding)
 
 ## How to use
+
+**Installing the site as a PWA (Progressive Web App)**
+
 **Starting engines**
 
 TODO: Write something about the home page.
   
 The engines can also be accessed directly, via https://jdsle.github.io/RSDK/v{version}. for example, https://jdsle.github.io/RSDK/v5U
 
+
 > [!IMPORTANT]  
 > Don't forget about the files! RSDK-Library does not provide any game assets, so ensure that the engine has the necessary files required to start. (eg, Data.rsdk, Game.wasm)
+
 
 **File Manager**
 
@@ -18,7 +23,14 @@ Each engine has their own file system. TODO: finish this
 
 **Settings**
 
-The settings page currently provides two options, a toggle for enabling the plus dlc (allowed as per the engine licenses), and a switch for the device profile. Don't get this page confused with Settings.ini
+The settings page currently provides two options -
+
+##### Enable Plus DLC
+Allowed per engine licenses, this enables plus on supported engines. Those being RSDkv3, RSDKv4, and RSDKv5/U. Disabled by default.
+
+##### Device Profile
+This option changes how the engine behaves. Desktop will act like a PC build of RSDK, Mobile - well. You get it. Desktop by default.
+##### *Currently only supported by RSDkv4
 
 ## Known issues
 
