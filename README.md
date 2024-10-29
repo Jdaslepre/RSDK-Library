@@ -1,6 +1,6 @@
 ## RSDK-Library
 
-RSDK-Library is a collection of WebAssembly ports of the RSDK Decompilations, by [RSDKModding.](https://github.com/RSDKModding)
+RSDK-Library is a collection of WebAssembly ports, of [RSDKModding's](https://github.com/RSDKModding) Decompilations.
 
 ## How to use
 
