@@ -1,3 +1,9 @@
+// --------------------
+// UI Component Imports
+// --------------------
+
+import { toast } from "sonner"
+
 // ---------------
 // Library Imports
 // ---------------
@@ -132,6 +138,7 @@ class EngineFS {
 
     private static async FileUploadCommon(files: FileList | File[]) {
         EngineFS.actionInProgress = true;
+        EngineFS.actionProgress = 0;
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
@@ -141,8 +148,6 @@ class EngineFS {
                 } else {
                     await EngineFS.DoFileWrite(file, filePath);
                 }
-                EngineFS.actionProgress = Math.round(((i + 1) / files.length) * 100);
-                console.log(`Upload Progress: ${EngineFS.actionProgress}%`);
             }
             await EngineFS.Save();
         } finally {
@@ -162,6 +167,12 @@ class EngineFS {
     private static async DoFileWrite(file: File, filePath: string) {
         return new Promise<void>((resolve, reject) => {
             const reader = new FileReader();
+            reader.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    EngineFS.actionProgress = (event.loaded / event.total) * 100;
+                    console.log(`Upload Progress: ${EngineFS.actionProgress}%`);
+                }
+            };
             reader.onload = async () => {
                 try {
                     FS.writeFile(filePath, new Uint8Array(await file.arrayBuffer()), { encoding: 'binary' });
@@ -200,6 +211,7 @@ class EngineFS {
             for (const i of paths) {
                 await ZipFile(i, i.split('/').pop()!);
             }
+            toast('Attempting to download files...');
             const content = await zip.generateAsync({ type: 'blob' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
@@ -227,6 +239,7 @@ class EngineFS {
             FS.mkdir(dstPath);
             await EngineFS.Save();
             console.log(`EngineFS.DirectoryCreate: Created ${dstPath}`);
+            toast(`Created directory ${dstPath}.`);
         } catch (error) {
             EngineFS.AlertError(`EngineFS.DirectoryCreate Error: ${error}`);
             throw error;
@@ -252,11 +265,13 @@ class EngineFS {
                     EngineFS.actionInProgress = false;
                     return;
                 }
+                // the toast is intentionally setup this way
                 if (isCut) {
                     FS.rename(oldPath, newPath);
-                    console.log(`Moved ${oldPath} to ${newPath}`);
+                    toast(`Pasted item ${oldPath} to ${newPath}.`);
                 } else {
                     await EngineFS.ItemDoCopy(item, oldPath, newPath);
+                    toast(`Pasted item ${oldPath} to ${newPath}.`);
                 }
             } catch (error) {
                 EngineFS.AlertError(`EngineFS.Paste Error: ${error}`);
@@ -278,6 +293,7 @@ class EngineFS {
             }
             FS.rename(srcPath, dstPath);
             await EngineFS.Save();
+            toast(`${srcPath} Renamed to ${dstPath}.`);
         } catch (error) {
             EngineFS.AlertError(`EngineFS.Rename Error: ${error}`);
             throw error;
@@ -289,21 +305,22 @@ class EngineFS {
             if (!window.confirm(`Are you sure you want to delete the selected items? This action is irreversible.`)) {
                 return;
             }
+            let path = "Uninitialized";
             for (const i of names) {
-                const path = `${EngineFS.fspath}/${i}`;
+                path = `${EngineFS.fspath}/${i}`;
                 if (!FS.lookupPath(path).node) {
                     console.warn(`Tried to delete "${i}" - which doesn't exist?`);
                     continue;
                 }
                 if (await EngineFS.DirectoryCheck(path)) {
                     EngineFS.DirectoryDeleteRecursive(path);
-                    console.log(`EngineFS.Delete: ${path} deleted`);
                 } else {
                     FS.unlink(path);
-                    console.log(`EngineFS.Delete: ${path} deleted`);
                 }
             }
             await EngineFS.Save();
+            console.log(`EngineFS.Delete: ${path} deleted`);
+            toast(`${path} Deleted.`);
         } catch (err) {
             EngineFS.AlertError(`EngineFS.Delete Error: ${err}`);
             throw err;
@@ -313,7 +330,7 @@ class EngineFS {
     public static async GetPathItems() {
         const files: FileItem[] = [];
         for (const name of FS.readdir(EngineFS.fspath)) {
-            if (name === "." || name === "..") continue;
+            if (name === '.' || name === '..') continue;
             const path = `${EngineFS.fspath}/${name}`;
             files.push({
                 name,
@@ -341,27 +358,41 @@ class EngineFS {
     }
 
     private static async ItemDoCopy(item: FileItem, src: string, dst: string) {
-        if (EngineFS.CheckSubdir(EngineFS.PathNormalize(src), EngineFS.PathNormalize(dst))) {
-            alert(`Whoa there!\nThe destination folder is a subfolder of the source folder`);
-            return;
-        }
-        if (item.isDirectory) {
-            try {
-                FS.stat(dst);
-            } catch (e: any) {
-                FS.mkdir(dst);
+        return new Promise<void>(async (resolve, reject) => {
+            if (EngineFS.CheckSubdir(EngineFS.PathNormalize(src), EngineFS.PathNormalize(dst))) {
+                alert(`Whoa there!\nThe destination folder is a subfolder of the source folder`);
+                reject();
+                return;
             }
-            await EngineFS.DirectoryCopyRecursive(src, dst);
-            return;
-        }
-        FS.writeFile(dst, FS.readFile(src));
+
+            // introducing, the copy-inator
+            let targetDst = dst;
+            let i = 1;
+            while (FS.analyzePath(targetDst).exists) {
+                targetDst = `${dst.replace(/(.*\/)?([^\/]*)$/, `$1${item.name} - Copy${i > 1 ? ` (${i})` : ''}`)}`;
+                i++;
+            }
+
+            if (item.isDirectory) {
+                try {
+                    FS.stat(targetDst);
+                } catch (e: any) {
+                    FS.mkdir(targetDst);
+                }
+                await EngineFS.DirectoryCopyRecursive(src, targetDst);
+                resolve();
+                return;
+            }
+            FS.writeFile(targetDst, FS.readFile(src));
+            resolve();
+        });
     }
 
     private static async ZipExtract(file: File, fsPath: string): Promise<void> {
         return new Promise<void>(async (resolve, reject) => {
             try {
                 const zip = await JSZip.loadAsync(file);
-                console.log("Loaded ZIP file");
+                console.log('Loaded ZIP file');
 
                 // Setting some stuff up, just get the info about the zip
                 const directoryList: string[] = [];
@@ -406,65 +437,73 @@ class EngineFS {
                 console.log('Zip extraction complete! Synchronizing FileSystem...');
                 await EngineFS.Save();
                 EngineFS.actionInProgress = false;
+                toast(`Extracted zip ${file.name} to ${fsPath}.`);
                 resolve();
             } catch (error) {
-                console.error("Error during ZIP extraction:", error);
+                EngineFS.AlertError(`EngineFS.ZipExtract Error: ${error}`);
                 reject(error);
             }
         });
     }
 
     private static async DirectoryCopyRecursive(src: string, dest: string) {
-        try {
+        return new Promise<void>(async (resolve, reject) => {
             try {
-                FS.stat(dest);
-            } catch (e) {
-                FS.mkdir(dest);
-            }
-            const files = FS.readdir(src);
-            await Promise.all(files.map(async (file: any) => {
-                if (file === '.' || file === '..') return;
-                const srcPath = `${src}/${file}`;
-                const destPath = `${dest}/${file}`;
-                if (await EngineFS.DirectoryCheck(srcPath)) {
-                    await EngineFS.DirectoryCopyRecursive(srcPath, destPath);
-                } else {
-                    try {
-                        FS.stat(destPath);
-                        console.warn(`File ${destPath} already exists. Skipping.`);
-                    } catch (e) {
-                        FS.writeFile(destPath, FS.readFile(srcPath));
-                        console.log(`Copied file ${srcPath} to ${destPath}`);
-                    }
+                try {
+                    FS.stat(dest);
+                } catch (e) {
+                    FS.mkdir(dest);
                 }
-            }));
-        } catch (error) {
-            EngineFS.AlertError(`EngineFS.DirectoryCopyRecursive Error: ${error} - from ${src} -> ${dest}`);
-        }
+                const files = FS.readdir(src);
+                await Promise.all(files.map(async (file: any) => {
+                    if (file === '.' || file === '..') return;
+                    const srcPath = `${src}/${file}`;
+                    const destPath = `${dest}/${file}`;
+                    if (await EngineFS.DirectoryCheck(srcPath)) {
+                        await EngineFS.DirectoryCopyRecursive(srcPath, destPath);
+                        resolve();
+                    } else {
+                        // this is terrible lol
+                        try {
+                            FS.stat(destPath);
+                            console.warn(`File ${destPath} already exists. Skipping.`);
+                            resolve();
+                        } catch (e) {
+                            FS.writeFile(destPath, FS.readFile(srcPath));
+                            resolve();
+                        }
+                    }
+                }));
+            } catch (error) {
+                EngineFS.AlertError(`EngineFS.DirectoryCopyRecursive Error: ${error} - from ${src} -> ${dest}`);
+                reject();
+            }
+        });
     }
 
     private static DirectoryDeleteRecursive(path: string) {
-        try {
-            const files: string[] = FS.readdir(path);
-
-            files.forEach((file: string) => {
-                if (file === '.' || file === '..') {
-                    return;
-                }
-                const filePath = path + '/' + file;
-                const stat = FS.stat(filePath);
-
-                if (FS.isDir(stat.mode)) {
-                    EngineFS.DirectoryDeleteRecursive(filePath);
-                } else if (FS.isFile(stat.mode)) {
-                    FS.unlink(filePath);
-                }
-            });
-
-            FS.rmdir(path);
-        } catch (error) {
-            EngineFS.AlertError(`EngineFS.DirectoryDeleteRecursive Error: ${error} - target -> ${path}`);
-        }
+        return new Promise<void>(async (resolve, reject) => {
+            try {
+                const files: string[] = FS.readdir(path);
+                files.forEach((file: string) => {
+                    if (file === '.' || file === '..') return;
+                    const filePath = path + '/' + file;
+                    const stat = FS.stat(filePath);
+                    if (FS.isDir(stat.mode)) {
+                        EngineFS.DirectoryDeleteRecursive(filePath);
+                        resolve();
+                    } else if (FS.isFile(stat.mode)) {
+                        FS.unlink(filePath);
+                        resolve();
+                    }
+                });
+                FS.rmdir(path);
+                resolve();
+            } catch (error) {
+                EngineFS.AlertError(`EngineFS.DirectoryDeleteRecursive Error: ${error} - target -> ${path}`);
+                reject();
+            }
+        });
     }
 
     // Other misc stuff

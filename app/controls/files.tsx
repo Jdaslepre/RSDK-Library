@@ -10,11 +10,12 @@ import * as Icons from 'lucide-react';
 
 import * as Tooltip from '@/components/ui/tooltip';
 import * as AlertDialog from '@/components/ui/alert-dialog'
-import * as Dropdown from '@/components/ui/dropdown-menu';
 
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
+import { Progress } from "@/components/ui/progress"
+import { Toaster } from "sonner"
 
 // ------------
 // Misc Imports
@@ -202,10 +203,18 @@ const FilesPage: React.FC<Props> = ({ id }) => {
             <AlertDialog.AlertDialog open={actionFinished}>
                 <AlertDialog.AlertDialogTrigger />
                 <AlertDialog.AlertDialogContent>
-                    <AlertDialog.AlertDialogTitle>Upload Progress</AlertDialog.AlertDialogTitle>
+                    <AlertDialog.AlertDialogTitle>
+                        <div className='flex items-center justify-start space-x-2'>
+                            <Icons.FolderClosed />
+                            <span>Upload Progress</span>
+                        </div>
+                    </AlertDialog.AlertDialogTitle>
                     <AlertDialog.AlertDialogDescription>
                         Uploading... {actionProgress.toFixed(2)}%
                     </AlertDialog.AlertDialogDescription>
+                    <AlertDialog.AlertDialogFooter>
+                        <Progress className="h-2" value={actionProgress} />
+                    </AlertDialog.AlertDialogFooter>
                 </AlertDialog.AlertDialogContent>
             </AlertDialog.AlertDialog>
 
@@ -323,6 +332,7 @@ const FilesPage: React.FC<Props> = ({ id }) => {
                     </Toggle>
                 ))}
             </div>
+            <Toaster />
         </div>
     );
 };
