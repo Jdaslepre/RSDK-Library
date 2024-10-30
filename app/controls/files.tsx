@@ -241,7 +241,7 @@ const FilesPage: React.FC<Props> = ({ id }) => {
                             </Button>
                         </Tooltip.TooltipTrigger>
                         <Tooltip.TooltipContent>
-                            <p>Export item</p>
+                            <p>Download item</p>
                         </Tooltip.TooltipContent>
                     </Tooltip.Tooltip>
                     <Tooltip.Tooltip>
@@ -268,7 +268,7 @@ const FilesPage: React.FC<Props> = ({ id }) => {
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
                             <Button variant='outline' size='icon' onClick={Toolbar_ItemCopy_OnClick}>
-                                <Icons.Copy />
+                                <Icons.CopySlash />
                             </Button>
                         </Tooltip.TooltipTrigger>
                         <Tooltip.TooltipContent>
@@ -298,7 +298,7 @@ const FilesPage: React.FC<Props> = ({ id }) => {
                     <Tooltip.Tooltip>
                         <Tooltip.TooltipTrigger asChild>
                             <Button variant='outline' size='icon' onClick={Toolbar_Delete_OnClick}>
-                                <Icons.Trash />
+                                <Icons.Trash2 />
                             </Button>
                         </Tooltip.TooltipTrigger>
                         <Tooltip.TooltipContent>

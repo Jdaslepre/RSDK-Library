@@ -43,7 +43,7 @@ export default function Home() {
                             </Breadcrumb.Breadcrumb>
                         </div>
                     </header>
-                    <div className='p-6 flex-1 overflow-auto'>
+                    <div className='p-4 flex-1 overflow-auto'>
                         <PageLoader path={currentPath} setCurrentPath={setCurrentPath} />
                     </div>
                 </main>

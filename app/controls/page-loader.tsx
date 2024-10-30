@@ -42,11 +42,11 @@ const PageLoader: React.FC<Props> = ({ path, setCurrentPath }) => {
 
             switch (path) {
                 case 'home': AddNode('Home', '/'); break;
-                case 'rsdkv2': AddNode('RSDKv2', '/'); break;
-                case 'rsdkv3': AddNode('RSDKv3', '/'); break;
-                case 'rsdkv4': AddNode('RSDKv4', '/'); break;
-                case 'rsdkv5': AddNode('RSDKv5', '/'); break;
-                case 'rsdkv5u': AddNode('RSDKv5U', '/'); break;
+                case 'rsdkv2':
+                case 'rsdkv3':
+                case 'rsdkv4':  // the breadcrumb is cleared by files, so
+                case 'rsdkv5':  // we can just do this
+                case 'rsdkv5u': AddNode('Loading', '/'); break;
                 default: break;
             }
         }
@@ -57,7 +57,7 @@ const PageLoader: React.FC<Props> = ({ path, setCurrentPath }) => {
             fallback={
               <div className="flex w-full items-center justify-center text-sm text-muted-foreground">
                 <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
+                Loading
               </div>
             }
           >
