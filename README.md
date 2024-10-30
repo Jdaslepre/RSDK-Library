@@ -79,6 +79,73 @@ Each port has their own build instructions. You can learn how to build them by v
 While not an engine - thought I'd include this here anyways
 * [RSDK-Library-FilesModule](https://github.com/Jdsle/RSDK-Library-FilesModule)
 
-## Building RSDKv5(U) Games for the Web
+## Building RSDKv5(U) Projects for the Web
 
-TODO
+Pretty simple to do - first, in the same directory as the projects' `CMakeLists.txt`, make a new file called `RSDK-Library-GameAPI.cmake`, with its contents being:
+
+```cmake
+if(EMSCRIPTEN)
+    set(WITH_RSDK OFF)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -O3 -std=c11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3 -std=c++11")
+
+    add_executable(${GAME_NAME} ${GAME_SOURCES})
+
+    set_target_properties(${GAME_NAME} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+    )
+
+    set(emsc_link_options
+        -sTOTAL_MEMORY=32MB
+        -sALLOW_MEMORY_GROWTH=1
+        -sWASM=1
+        -sLINKABLE=1
+        -sEXPORT_ALL=1
+        -sSIDE_MODULE=2
+        -sSINGLE_FILE=1
+        -sBINARYEN_ASYNC_COMPILATION=0
+        -sUSE_PTHREADS=1
+        -sPTHREAD_POOL_SIZE=4
+        -pthread
+        -g
+        -std=c++11
+    )
+
+    target_link_options(${GAME_NAME} PRIVATE ${emsc_link_options})
+
+    set_target_properties(${GAME_NAME} PROPERTIES
+        SUFFIX ".wasm"
+    )
+endif()
+```
+Then, locate the projects' `CMakeLists.txt`, and then find where it declares the game as a library (add_library). For example, this is what it'll look like in Sonic Mania:
+
+```cmake
+if(GAME_STATIC)
+    add_library(${GAME_NAME} STATIC ${GAME_SOURCES})
+else()
+    add_library(${GAME_NAME} SHARED ${GAME_SOURCES})
+endif()
+```
+
+We don't want this to run, so we will modify it as such, to use our custom `RSDK-Library-GameAPI.cmake` file
+
+```cmake
+if(EMSCRIPTEN)
+    include(RSDK-Library-GameAPI.cmake)
+else()
+    if(GAME_STATIC)
+        add_library(${GAME_NAME} STATIC ${GAME_SOURCES})
+    else()
+        add_library(${GAME_NAME} SHARED ${GAME_SOURCES})
+    endif()
+endif()
+```
+
+After that? you're pretty much good to go, just run these commands to compile the project:
+
+```bash
+emcmake cmake -B build
+cmake --build build
+```
