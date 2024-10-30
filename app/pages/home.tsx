@@ -39,7 +39,7 @@ const HomePage: React.FC = () => {
                 <span className="flex-grow text-left">RSDKv4</span>
             </Button>
 
-            <Button variant="outline" className="flex items-center p-6 space-x-2 h-20 font-bold w-full" onClick={() => {
+            <Button disabled variant="outline" className="flex items-center p-6 space-x-2 h-20 font-bold w-full" onClick={() => {
                 const siteUrl = window.location.origin + window.location.pathname;
                 window.open(`${siteUrl}v5`, '_blank');
             }}>
@@ -47,9 +47,9 @@ const HomePage: React.FC = () => {
                 <span className="flex-grow text-left">RSDKv5</span>
             </Button>
 
-            <Button variant="outline" className="flex items-center p-6 space-x-2 h-20 font-bold w-full" onClick={() => {
+            <Button disabled variant="outline" className="flex items-center p-6 space-x-2 h-20 font-bold w-full" onClick={() => {
                 const siteUrl = window.location.origin + window.location.pathname;
-                window.open(`${siteUrl}/v5U`, '_blank');
+                window.open(`${siteUrl}v5U`, '_blank');
             }}>
                 <img src="./assets/RSDKv5U.png" alt="Engine image" className='w-[2rem] h-[2rem]' />
                 <span className="flex-grow text-left">RSDKv5U</span>
