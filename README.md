@@ -4,20 +4,6 @@
 
 ## How to Use
 
-### Installing the Site as a PWA (Progressive Web App)
-
-Upon visiting the site, you should see an install button appear.
-
-![PWA Installation Prompt](/RepoAssets/ChromeInstallPrompt.png)
-
-When installed, the site will launch in its own window, appearing as a native application.
-
-![PWA Installed](/RepoAssets/ChromeInstalled.png)
-
-###### "Native." lol
-
----
-
 ### Starting Engines
 
 The home page contains links to the engines, but they can also be accessed directly via:
@@ -36,11 +22,12 @@ The settings page currently provides two options:
 - **Enable Plus DLC:** Enables Plus DLC on supported engines (v3, v4, and v5/U). Disabled by default.
 - **Device Profile:** Changes how the engine behaves. Desktop will act like a PC build of RSDK, Mobile - well, you get it. Desktop by default.
 
-### Known Issues
+## Known Issues
 
-- **File Uploading:** Uploading files *might* hang. Give it some time before trying to reload the page.
-- **Touch Coordinates:** Touch may be inaccurate if the canvas does not fill the screen.
-- **iOS Browsers:** The engine may freeze when hiding the toolbar.
+- Uploading files *might* hang. Give it some time before trying to reload the page
+- Touch coordinates may be inaccurate if the canvas does not fill the screen
+- On iOS, engines might freeze when hiding the toolbar on safari
+- RSDKv5: Native ModAPI probably won't work. Fine for legacy games though
 
 ## Building the Website
 
@@ -79,45 +66,45 @@ Each port has their own build instructions. You can learn how to build them by v
 While not an engine - thought I'd include this here anyways
 * [RSDK-Library-FilesModule](https://github.com/Jdsle/RSDK-Library-FilesModule)
 
-## Building RSDKv5(U) Projects for the Web
+## Building RSDKv5(U) Games/Mods for the Web
+
+> [!NOTE]  
+> Don't actually follow this, *yet* at least. While these instructions do work for Sonic Mania, they probably won't work for any mod. Might write a script for this or something
 
 Pretty simple to do - first, in the same directory as the projects' `CMakeLists.txt`, make a new file called `RSDK-Library-GameAPI.cmake`, with its contents being:
 
 ```cmake
-if(EMSCRIPTEN)
-    set(WITH_RSDK OFF)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -O3 -std=c11")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3 -std=c++11")
+set(WITH_RSDK OFF)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3")
 
-    add_executable(${GAME_NAME} ${GAME_SOURCES})
+add_executable(${GAME_NAME} ${GAME_SOURCES})
 
-    set_target_properties(${GAME_NAME} PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON
-    )
+set_target_properties(${GAME_NAME} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+)
 
-    set(emsc_link_options
-        -sTOTAL_MEMORY=32MB
-        -sALLOW_MEMORY_GROWTH=1
-        -sWASM=1
-        -sLINKABLE=1
-        -sEXPORT_ALL=1
-        -sSIDE_MODULE=2
-        -sSINGLE_FILE=1
-        -sBINARYEN_ASYNC_COMPILATION=0
-        -sUSE_PTHREADS=1
-        -sPTHREAD_POOL_SIZE=4
-        -pthread
-        -g
-        -std=c++11
-    )
+set(emsc_link_options
+    -sTOTAL_MEMORY=32MB
+    -sALLOW_MEMORY_GROWTH=1
+    -sWASM=1
+    -sLINKABLE=1
+    -sEXPORT_ALL=1
+    -sSIDE_MODULE=2
+    -sSINGLE_FILE=1
+    -sBINARYEN_ASYNC_COMPILATION=0
+    -sUSE_PTHREADS=1
+    -sPTHREAD_POOL_SIZE=4
+    -pthread
+    -g
+)
 
-    target_link_options(${GAME_NAME} PRIVATE ${emsc_link_options})
+target_link_options(${GAME_NAME} PRIVATE ${emsc_link_options})
 
-    set_target_properties(${GAME_NAME} PROPERTIES
-        SUFFIX ".wasm"
-    )
-endif()
+set_target_properties(${GAME_NAME} PROPERTIES
+    SUFFIX ".wasm"
+)
 ```
 Then, locate the projects' `CMakeLists.txt`, and then find where it declares the game as a library (add_library). For example, this is what it'll look like in Sonic Mania:
 
