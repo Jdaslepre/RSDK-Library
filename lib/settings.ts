@@ -17,14 +17,17 @@ const defaultSettings: ISettings = {
 };
 
 export const Load = (): ISettings => {
-    let savedSettings = null;
+    if (typeof window === 'undefined') return defaultSettings;
 
-    if (typeof window !== 'undefined') {
-        savedSettings = localStorage.getItem(SETTINGS_KEY);
+    const savedSettings = localStorage.getItem(SETTINGS_KEY);
+    
+    if (savedSettings) {
+        return JSON.parse(savedSettings);
+    } else {
+        return defaultSettings;
     }
-
-    return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
 };
+
 
 export const Save = (settings: ISettings) => {
     if (typeof window !== 'undefined') {
