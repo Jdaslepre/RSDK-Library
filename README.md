@@ -59,9 +59,9 @@ python -m http.server
 ## Building the engines
 
 Each port has their own build instructions. You can learn how to build them by visiting their repositories:
-* [RSDK-Library-v2](https://github.com/Jdsle/RSDK-Library-v2)
-* [RSDK-Library-v3](https://github.com/Jdsle/RSDK-Library-v3)
-* [RSDK-Library-v4](https://github.com/Jdsle/RSDK-Library-v4)
+* [RSDKv2-Decompilation](https://github.com/Jdsle/RSDKv2-Decompilation/tree/web)
+* [RSDKv3-Decompilation](https://github.com/Jdsle/RSDKv3-Decompilation/tree/web)
+* [RSDKv4-Decompilation](https://github.com/Jdsle/RSDKv4-Decompilation/tree/web)
 
 While not an engine - thought I'd include this here anyways
 * [RSDK-Library-FilesModule](https://github.com/Jdsle/RSDK-Library-FilesModule)
