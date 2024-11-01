@@ -1,18 +1,17 @@
-'use client';
+'use client'
 
-import * as React from 'react';
+import * as React from 'react'
 
 // ---------------------
 // Component Definitions
 // ---------------------
 
-// you shouldn't be seeing this
 const DefaultPage: React.FC = () => {
     return (
         <div>
-            hello :)
+            Uhh. Something broke within the navigation system - as you shouldn't be seeing this. Just refresh the page
         </div>
-    );
+    )
 }
 
-export default DefaultPage;
+export default DefaultPage

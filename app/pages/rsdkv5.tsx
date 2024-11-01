@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import FilesPage from '@/app/controls/files'
 
@@ -7,5 +7,5 @@ import FilesPage from '@/app/controls/files'
 // ---------------------
 
 export default function Def() {
-    return (<FilesPage id='RSDKv5' />);
+    return <FilesPage id='RSDKv5' />
 }

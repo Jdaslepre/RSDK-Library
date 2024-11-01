@@ -36,8 +36,8 @@ body {
   overflow: hidden;
 }
 
-.engineSplash {
-  z-index: 10;
+.emsplash {
+  z-index: 50;
   transition: opacity 0.163s linear;
 }
 

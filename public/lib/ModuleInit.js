@@ -2,7 +2,9 @@ var statusElement = document.getElementById('status');
 
 var Module = {
     onRuntimeInitialized: function () {
-
+        const splash = document.getElementById("splash");
+        splash.style.opacity = 0;
+        setTimeout(() => { splash.remove(); }, 1000);
     },
     print: (function () {
         var element = document.getElementById('output');

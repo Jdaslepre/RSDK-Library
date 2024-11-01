@@ -1,31 +1,31 @@
-'use client';
+'use client'
 
-import * as React from 'react';
+import * as React from 'react'
 
 // --------------------
 // UI Component Imports
 // --------------------
 
-import * as Icons from 'lucide-react';
+import * as Icons from 'lucide-react'
 
-import * as Command from '@/components/ui/command';
-import * as Popover from '@/components/ui/popover';
-import * as Form from '@/components/ui/form';
+import * as Command from 'ui/command'
+import * as Popover from 'ui/popover'
+import * as Form from 'ui/form'
 
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import { Button } from 'ui/button'
+import { Switch } from 'ui/switch'
 
 // ------------
 // Misc Imports
 // ------------
 
-import * as Settings from '@/lib/settings';
+import * as Settings from 'lib/settings'
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-import { cn } from '@/lib/utils';
-import { z } from 'zod';
+import { cn } from 'lib/utils'
+import { z } from 'zod'
 
 // ---------------------
 // Component Definitions
@@ -35,22 +35,22 @@ const FormSchema = z.object({
     theme: z.enum(['auto', 'light', 'dark']).default('auto').optional(),
     enablePlus: z.boolean().default(false).optional(),
     deviceProfile: z.string().default('desktop').optional(),
-});
+})
 
 export function DeviceProfileCombo() {
-    const instSettings = Settings.Load();
+    const instSettings = Settings.Load()
     const [open, setOpen] = React.useState(false)
-    const [selectedProfile, setSelectedProfile] = React.useState(instSettings.deviceProfile);
+    const [selectedProfile, setSelectedProfile] = React.useState(instSettings.deviceProfile)
 
     const List = [
         { value: 'desktop', label: 'Desktop' },
         { value: 'mobile', label: 'Mobile' },
-    ];
+    ]
 
     const onSelect = (val: string) => {
-        Settings.Save({ ...instSettings, deviceProfile: val });
-        setSelectedProfile(val);
-    };
+        Settings.Save({ ...instSettings, deviceProfile: val })
+        setSelectedProfile(val)
+    }
 
     return (
         <Popover.Popover open={open} onOpenChange={setOpen}>
@@ -75,8 +75,8 @@ export function DeviceProfileCombo() {
                                     key={item.value}
                                     value={item.value}
                                     onSelect={(currentValue) => {
-                                        onSelect(currentValue);
-                                        setOpen(false);
+                                        onSelect(currentValue)
+                                        setOpen(false)
                                     }}
                                 >
                                     <Icons.Check
@@ -97,7 +97,7 @@ export function DeviceProfileCombo() {
 }
 
 export function SettingsContent() {
-    const instSettings = Settings.Load();
+    const instSettings = Settings.Load()
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -105,21 +105,21 @@ export function SettingsContent() {
             enablePlus: instSettings.enablePlus ?? false,
             deviceProfile: instSettings.deviceProfile,
         },
-    });
+    })
 
     const actionSave = (data: z.infer<typeof FormSchema>) => {
         const settingsToSave: Settings.ISettings = {
             enablePlus: data.enablePlus ?? false,
             deviceProfile: data.deviceProfile || 'desktop',
-        };
+        }
 
         try {
-            Settings.Save(settingsToSave);
-            console.log('Saved settings:', settingsToSave);
+            Settings.Save(settingsToSave)
+            console.log('Saved settings:', settingsToSave)
         } catch (error) {
-            console.error('Error saving settings:', error);
+            console.error('Error saving settings:', error)
         }
-    };
+    }
 
     return (
         <Form.Form {...form}>
@@ -141,8 +141,8 @@ export function SettingsContent() {
                                         <Switch
                                             checked={field.value}
                                             onCheckedChange={(checked) => {
-                                                field.onChange(checked);
-                                                actionSave({ ...form.getValues(), enablePlus: checked });
+                                                field.onChange(checked)
+                                                actionSave({ ...form.getValues(), enablePlus: checked })
                                             }}
                                         />
                                     </Form.FormControl>
@@ -168,5 +168,5 @@ export function SettingsContent() {
                 </div>
             </form>
         </Form.Form>
-    );
+    )
 }

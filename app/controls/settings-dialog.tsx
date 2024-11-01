@@ -1,28 +1,28 @@
-'use client';
+'use client'
 
-import * as React from 'react';
+import * as React from 'react'
 
 // --------------------
 // UI Component Imports
 // --------------------
 
-import * as Icons from 'lucide-react';
+import * as Icons from 'lucide-react'
 
-import * as Dialog from '@/components/ui/dialog';
-import * as Drawer from '@/components/ui/drawer';
-import * as Sidebar from '@/components/ui/sidebar';
+import * as Dialog from 'ui/dialog'
+import * as Drawer from 'ui/drawer'
+import * as Sidebar from 'ui/sidebar'
 
 // -------------------------
 // Home UI Component Imports
 // -------------------------
 
-import { SettingsContent } from '@/app/controls/settings-content';
+import { SettingsContent } from '@/app/controls/settings-content'
 
 // ------------
 // Misc Imports
 // ------------
 
-import { useMediaQuery } from '@custom-react-hooks/use-media-query';
+import { useIsMobile } from 'hooks/use-mobile'
 
 // ---------------------
 // Component Definitions
@@ -30,20 +30,20 @@ import { useMediaQuery } from '@custom-react-hooks/use-media-query';
 
 export function SettingsDialog() {
     const [open, setOpen] = React.useState(false)
-    const isDesktop = useMediaQuery('(min-width: 768px)')
+    const isMobile = useIsMobile()
 
     const Header = () => (
         <div className='flex items-center justify-center space-x-2'>
             <Icons.Settings2 className='h-5 w-5' />
             <span>Settings</span>
         </div>
-    );
+    )
 
-    const Content = () => <SettingsContent />;
+    const Content = () => <SettingsContent />
 
     return (
         <>
-            {isDesktop ? (
+            {!isMobile ? (
                 <Dialog.Dialog open={open} onOpenChange={setOpen}>
                     <Dialog.DialogTrigger asChild>
                         <Sidebar.SidebarMenuButton asChild>
@@ -83,5 +83,5 @@ export function SettingsDialog() {
                 </Drawer.Drawer>
             )}
         </>
-    );
+    )
 }

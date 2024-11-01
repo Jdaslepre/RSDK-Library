@@ -12,8 +12,8 @@ import '@/app/engine.css'
 import Head from 'next/head'
 import Script from 'next/script'
 
-import { Skeleton } from "@/components/ui/skeleton"
 import { ThemeProvider } from '@/app/controls/theme-provider'
+import { Splash } from '@/app/controls/splash'
 
 // ---------------
 // Library Imports
@@ -44,15 +44,7 @@ export default function V4() {
             </Head>
             <div className='enginePage'>
                 <ThemeProvider attribute='class' defaultTheme='dark' enableSystem>
-                    <div id='splash' className='engineSplash relative flex min-h-screen flex-col bg-background items-center justify-center'>
-                        <div className="flex flex-col space-y-3">
-                            <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-[250px]" />
-                                <Skeleton className="h-4 w-[200px]" />
-                            </div>
-                        </div>
-                    </div>
+                    <Splash/>
                     <canvas className='engineCanvas' id='canvas' />
                 </ThemeProvider>
                 <Script src='./lib/RSDKv4.js' />

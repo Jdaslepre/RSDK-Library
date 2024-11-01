@@ -37,13 +37,14 @@ class EngineFS {
     // Variable Definitions
     // --------------------
 
-    private static activeMount: string | null = null;
+    public static fspath: string = "//FileSystem"
+    private static activeMount: string | null = null
 
-    public static fspath: string = "//FileSystem";
+    public static actionInProgress: boolean = false
+    public static actionProgress: number = 0
+    public static actionStatus: string = ""
 
-    private static clipboard: { items: FileItem[], isCut: boolean } | null = null;
-    public static actionInProgress: boolean = false;
-    public static actionProgress: number = 0;
+    private static clipboard: { items: FileItem[], isCut: boolean } | null = null
 
     // --------------------
     // Function Definitions
@@ -52,39 +53,37 @@ class EngineFS {
     public static async Init(id: string) {
         return new Promise<void>(async (resolve, reject) => {
             if (EngineFS.activeMount) {
-                await EngineFS.Unmount(EngineFS.activeMount);
+                await EngineFS.Unmount(EngineFS.activeMount)
             }
             if (!FS.analyzePath(`/${id}`).exists)
-                FS.mkdir(id);
-            FS.mount(IDBFS, { root: `/${id}` }, id);
-            await EngineFS.SyncInit();
-            EngineFS.activeMount = id;
+                FS.mkdir(id)
+            FS.mount(IDBFS, { root: `/${id}` }, id)
+            EngineFS.activeMount = id
+            await EngineFS.SyncInit()
             EngineFS.fspath = `/${id}`
-            resolve();
-        });
+            resolve()
+        })
     }
 
     private static async Unmount(id: string) {
         return new Promise<void>((resolve) => {
-            FS.unmount(id);
-            if (EngineFS.activeMount === id) {
-                EngineFS.activeMount = null;
-            }
-            resolve();
-        });
+            FS.unmount(id)
+            EngineFS.activeMount = null
+            resolve()
+        })
     }
 
     private static async SyncInit() {
         return new Promise<void>((resolve, reject) => {
             FS.syncfs(true, function (error: any) {
                 if (error) {
-                    EngineFS.AlertError(`EngineFS.SyncInit Error: ${error}`);
-                    reject(error);
+                    EngineFS.AlertError(`EngineFS.SyncInit Error: ${error}`)
+                    reject(error)
                 } else {
-                    resolve();
+                    resolve()
                 }
-            });
-        });
+            })
+        })
     }
 
     public static async Save() {
@@ -106,19 +105,21 @@ class EngineFS {
         console.error(msg);
     }
 
-    public static async FileUpload() {
-        return EngineFS.FileUploadDlg((files) => EngineFS.FileUploadCommon(files));
+    public static async FileUpload(useDir: boolean) {
+        return EngineFS.FileUploadDlg(useDir, (files) => EngineFS.FileUploadCommon(files, true));
     }
 
     public static async DropFileUpload(files: File[]) {
-        return EngineFS.FileUploadCommon(files);
+        return EngineFS.FileUploadCommon(files, true);
     }
 
-    private static async FileUploadDlg(callback: (files: FileList) => Promise<void>) {
+    private static async FileUploadDlg(useDir: boolean, callback: (files: FileList) => Promise<void>) {
         return new Promise<void>((resolve, reject) => {
             const _input = document.createElement('input');
             _input.type = 'file';
             _input.multiple = true;
+            if (useDir)
+                _input.webkitdirectory = true;
             _input.onchange = async () => {
                 if (!_input.files || !_input.files.length) {
                     console.warn('EngineFS.FileUpload: No files selected for upload');
@@ -135,23 +136,33 @@ class EngineFS {
             _input.click();
         });
     }
-
-    private static async FileUploadCommon(files: FileList | File[]) {
+    public static async FileUploadCommon(files: FileList | File[], shouldSave: boolean, parent: string = EngineFS.fspath) {
         EngineFS.actionInProgress = true;
         EngineFS.actionProgress = 0;
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                const filePath = `${EngineFS.fspath}/${file.name}`;
+                const filePath = `${parent}/${file.webkitRelativePath || file.name}`;
+                EngineFS.actionStatus = `Uploading ${filePath}...`;
+                let targetPath = '';
+                for (const part of (PATH.dirname(filePath)).split('/')) {
+                    targetPath += `/${part}`;
+                    if (!FS.analyzePath(targetPath).exists) {
+                        FS.mkdir(targetPath);
+                    }
+                }
                 if (file.name.toLowerCase().endsWith('.zip')) {
                     await EngineFS.DoZipExtract(file);
                 } else {
                     await EngineFS.DoFileWrite(file, filePath);
                 }
             }
-            await EngineFS.Save();
+            if (shouldSave)
+                await EngineFS.Save();
         } finally {
-            EngineFS.actionInProgress = false;
+            EngineFS.actionInProgress = false
+            EngineFS.actionProgress = 0
+            EngineFS.actionStatus = ""
         }
     }
 
@@ -170,7 +181,6 @@ class EngineFS {
             reader.onprogress = (event) => {
                 if (event.lengthComputable) {
                     EngineFS.actionProgress = (event.loaded / event.total) * 100;
-                    console.log(`Upload Progress: ${EngineFS.actionProgress}%`);
                 }
             };
             reader.onload = async () => {
@@ -504,17 +514,6 @@ class EngineFS {
                 reject();
             }
         });
-    }
-
-    // Other misc stuff
-    private static CheckTextFile(fileName: string, content: Uint8Array): boolean {
-        const textFileExtensions = ['.txt', '.json', '.md', '.csv', '.html'];
-        const extension = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
-
-        if (textFileExtensions.includes(extension))
-            return true;
-
-        return content.every(byte => (byte >= 32 && byte <= 126) || byte === 9 || byte === 10 || byte === 13);
     }
 }
 
