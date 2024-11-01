@@ -42,18 +42,11 @@ npm run build
 
 This will output a static site, located at (root)/out.
 
-### Hosting the website with npx
+### Hosting the website locally
 
 Run this command in the repository root:
 ```bash
 npx serve@latest out
-```
-
-### Hosting the website with python
-
-Run this command in (repo root)/out.
-```
-python -m http.server
 ```
 
 ## Building the engines
