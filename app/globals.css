@@ -28,6 +28,16 @@ body {
   width: 100%;
 }
 
+.PWA-Title-Draggable {
+  -webkit-app-region: drag;
+  /* app-region: drag; */
+}
+
+.PWA-Title-NonDraggable {
+  -webkit-app-region: no-drag;
+  /* app-region: no-drag; */
+}
+
 .enginePage {
   background-color: #000000;
   color: var(--text-color-light);

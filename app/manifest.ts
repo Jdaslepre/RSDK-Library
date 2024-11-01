@@ -4,7 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'RSDK-Library',
     short_name: 'RSDK',
-    start_url: '/RSDK',
+    start_url: '.',
+    theme_color: "#231F20",
     display: 'standalone',
     display_override: ["window-controls-overlay"],
     icons: [

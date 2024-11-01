@@ -52,8 +52,8 @@ const PageContent: React.FC = () => {
         <>
             <Side.AppSidebar onNavigate={(path) => setCurrentPath(path)} />
             <main className='w-screen h-screen flex flex-col'>
-                <header className='sticky top-0 z-10 p-2 flex h-14 shrink-0 items-center border-b'>
-                    <div className={`flex items-center gap-2 ${!isMobile ? 'px-4' : 'pl-2'}`}>
+                <header className='PWA-Title-Draggable sticky top-0 z-10 p-2 flex h-14 shrink-0 items-center border-b'>
+                    <div className={`PWA-Title-NonDraggable flex items-center gap-2 ${!isMobile ? 'px-4' : 'pl-2'}`}>
                         {isMobile ? (
                             <>
                                 <Button variant='ghost' size='sm' onClick={() => setCurrentPath('home')}>
