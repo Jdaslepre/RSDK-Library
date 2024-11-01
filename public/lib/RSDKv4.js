@@ -71,10 +71,14 @@ function RSDK_Init() {
         // index 1 - device profile
         _RSDK_Configure(settings.enablePlus, 0);
 
-        if (settings.deviceProfile === "desktop")
-            _RSDK_Configure(0, 1);
-        else if (settings.deviceProfile === "mobile")
-            _RSDK_Configure(1, 1);
+        switch (settings.deviceProfile) {
+            case "mobile":
+                _RSDK_Configure(1, 1);
+                break;
+            default:
+                _RSDK_Configure(0, 1);
+                break;
+        }        
     }
 
     _RSDK_Initialize();
