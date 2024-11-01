@@ -22,16 +22,19 @@ import Script from 'next/script'
 // ---------------------
 
 export const metadata: Next.Metadata = {
+    applicationName: 'RSDK',
     title: 'RSDK-Library',
     description: 'RSDK-Library website',
+    manifest: "./manifest.webmanifest",
+    appleWebApp: {
+        capable: true,
+        title: 'RSDK',
+    },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang='en' suppressHydrationWarning>
-            <head>
-                <link rel='manifest' href='./manifest.webmanifest' />
-            </head>
             <body className={`min-h-screen bg-background ${GeistSans.className}`}>
                 <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
                     <Splash />

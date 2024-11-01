@@ -82,7 +82,7 @@ const PageContent: React.FC = () => {
                         <Separator orientation='vertical' className='mr-2 h-4' />
                         <Breadcrumb.Breadcrumb>
                             <Breadcrumb.BreadcrumbList>
-                                <BreadcrumbContent currentPath={currentPath} setCurrentPath={setCurrentPath} />
+                                <BreadcrumbContent currentPath={currentPath} />
                             </Breadcrumb.BreadcrumbList>
                         </Breadcrumb.Breadcrumb>
                     </div>
@@ -95,7 +95,7 @@ const PageContent: React.FC = () => {
     );
 };
 
-const BreadcrumbContent: React.FC<{ currentPath: string, setCurrentPath: (path: string) => void }> = ({ currentPath, setCurrentPath }) => {
+const BreadcrumbContent: React.FC<{ currentPath: string }> = ({ currentPath }) => {
     const { items, AddNode } = HomeBreadcrumb.useBreadcrumb()
 
     React.useEffect(() => {

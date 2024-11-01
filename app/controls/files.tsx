@@ -276,7 +276,7 @@ const FilesPage: React.FC<Props> = ({ id }) => {
         },
         {
             icon: <Icons.Download />,
-            label: 'Download Item',
+            label: 'Download Selected Item(s)',
             onClick: Toolbar_Export_OnClick
         }
     ]
