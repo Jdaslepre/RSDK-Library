@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display_override: ["window-controls-overlay"],
     icons: [
         {
-          "src": "./assets/RSDK.png",
+          "src": "./icons/RSDK.png",
           "sizes": "256x256",
           "type": "image/png"
         }
