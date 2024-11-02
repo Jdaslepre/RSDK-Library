@@ -42,7 +42,7 @@ const HomePage: React.FC = () => {
                 filesClicked={() => setCurrentPath('rsdkv4')}
             />
 
-            <LaunchEngineGroup disabled title='RSDKv5' icon='./assets/RSDKv5.png'
+            <LaunchEngineGroup title='RSDKv5' icon='./assets/RSDKv5.png'
                 launchClicked={() => {
                     const siteUrl = window.location.origin + window.location.pathname
                     window.location.href = `${siteUrl}v5`
@@ -50,7 +50,7 @@ const HomePage: React.FC = () => {
                 filesClicked={() => setCurrentPath('rsdkv5')}
             />
 
-            <LaunchEngineGroup disabled title='RSDKv5U' icon='./assets/RSDKv5U.png'
+            <LaunchEngineGroup title='RSDKv5U' icon='./assets/RSDKv5U.png'
                 launchClicked={() => {
                     const siteUrl = window.location.origin + window.location.pathname
                     window.location.href = `${siteUrl}v5U`
