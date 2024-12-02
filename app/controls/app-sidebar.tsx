@@ -37,9 +37,11 @@ export const EngineList = [
 ]
 
 const Resources = [
-    { name: 'Website Source Code', url: 'https://github.com/Jdsle/RSDK', icon: Icons.Code2 },
-    { name: 'RSDK-Modding Github', url: 'https://github.com/RSDKModding', icon: Icons.Globe },
-    { name: 'RSDK-Modding Website', url: 'https://rsdkmodding.com', icon: Icons.Globe }
+    { name: 'Website Source Repository', url: 'https://github.com/Jdsle/RSDK', icon: Icons.Globe },
+    { name: 'RSDKv2 Source Repository', url: 'https://github.com/Jdsle/RSDKv2-Decompilation/tree/web', icon: Icons.Code2 },
+    { name: 'RSDKv3 Source Repository', url: 'https://github.com/Jdsle/RSDKv3-Decompilation/tree/web', icon: Icons.Code2 },
+    { name: 'RSDKv4 Source Repository', url: 'https://github.com/Jdsle/RSDKv4-Decompilation/tree/web', icon: Icons.Code2 },
+    { name: 'RSDKv5 Source Repository', url: 'https://github.com/Jdsle/RSDKv5-Decompilation/tree/web', icon: Icons.Code2 },
 ]
 
 interface Props {
