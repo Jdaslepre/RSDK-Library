@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import * as untitled from '@untitled-ui/icons-react';
 import * as Icons from 'lucide-react'
 
 // --------------------
@@ -11,7 +12,7 @@ import * as Path from '@/app/controls/path-context'
 import * as HomeBreadcrumb from '@/app/controls/breadcrumb'
 import * as Side from '@/app/controls/app-sidebar'
 
-import * as Sidebar from 'ui/sidebar'
+import * as Sidebar from '@/components/mod/sidebar'
 import * as Drawer from 'ui/drawer'
 import * as Breadcrumb from 'ui/breadcrumb'
 
@@ -47,13 +48,14 @@ const PageContent: React.FC = () => {
     const { currentPath, setCurrentPath } = Path.useCurrentPath();
     const [open, setOpen] = React.useState(false);
     const isMobile = useIsMobile();
+    const { toggleSidebar } = Sidebar.useSidebar();
 
     return (
         <>
             <Side.AppSidebar onNavigate={(path) => setCurrentPath(path)} />
             <main className='w-screen h-screen flex flex-col'>
-                <header className='PWA-Title-Draggable sticky top-0 z-10 p-2 flex h-14 shrink-0 items-center border-b'>
-                    <div className={`PWA-Title-NonDraggable flex items-center gap-2 ${!isMobile ? 'px-4' : 'pl-2'}`}>
+                <header className='PWA-Title-Draggable sticky top-0 z-10 flex h-12 shrink-0 items-center border-b'>
+                    <div className={`PWA-Title-NonDraggable flex items-center gap-2 ${!isMobile ? 'px-2' : 'pl-2'}`}>
                         {isMobile ? (
                             <>
                                 <Button variant='ghost' size='sm' onClick={() => setCurrentPath('home')}>
@@ -77,7 +79,9 @@ const PageContent: React.FC = () => {
                                 </Drawer.Drawer>
                             </>
                         ) : (
-                            <Sidebar.SidebarTrigger className='-ml-1' />
+                            <Button className='w-9 h-9' variant='ghost' size='sm' onClick={toggleSidebar}>
+                                <untitled.Menu01 />
+                            </Button>
                         )}
                         <Separator orientation='vertical' className='mr-2 h-4' />
                         <Breadcrumb.Breadcrumb>
@@ -96,31 +100,36 @@ const PageContent: React.FC = () => {
 };
 
 const BreadcrumbContent: React.FC<{ currentPath: string }> = ({ currentPath }) => {
-    const { items, AddNode } = HomeBreadcrumb.useBreadcrumb()
+    const { items, AddNode } = HomeBreadcrumb.useBreadcrumb();
 
     React.useEffect(() => {
         if (currentPath === 'home') {
-            AddNode('Home', '/', () => null)
+            AddNode('Home', '/', () => null);
         }
-    }, [currentPath, AddNode])
+    }, [currentPath, AddNode]);
 
     return (
         <>
             {items.map((item, index) => (
                 <React.Fragment key={index}>
                     <Breadcrumb.BreadcrumbItem>
-                        <Breadcrumb.BreadcrumbLink
-                            href='#'
-                            onClick={(e) => {
-                                e.preventDefault()
-                                if (item.onClick) item.onClick()
-                            }}>
-                            {item.label}
-                        </Breadcrumb.BreadcrumbLink>
+                        {index === items.length - 1 ? (
+                            <Breadcrumb.BreadcrumbPage>
+                                {item.label}
+                            </Breadcrumb.BreadcrumbPage>
+                        ) : (
+                            <Breadcrumb.BreadcrumbLink
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (item.onClick) item.onClick();
+                                }}>
+                                {item.label}
+                            </Breadcrumb.BreadcrumbLink>
+                        )}
                     </Breadcrumb.BreadcrumbItem>
                     {index < items.length - 1 && <Breadcrumb.BreadcrumbSeparator />}
                 </React.Fragment>
             ))}
         </>
-    )
-}
+    );
+};

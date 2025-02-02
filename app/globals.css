@@ -109,7 +109,7 @@ body {
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 8.6%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -133,7 +133,7 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 240 10.9% 7%;
+    --sidebar-background: 240 0.18% 4%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;

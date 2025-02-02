@@ -6,11 +6,11 @@ import * as React from 'react'
 // UI Component Imports
 // --------------------
 
-import * as Icons from 'lucide-react'
+import * as untitled from '@untitled-ui/icons-react';
 
 import * as Dialog from 'ui/dialog'
 import * as Drawer from 'ui/drawer'
-import * as Sidebar from 'ui/sidebar'
+import * as Sidebar from '@/components/mod/sidebar'
 
 // -------------------------
 // Home UI Component Imports
@@ -34,7 +34,7 @@ export function SettingsDialog() {
 
     const Header = () => (
         <div className='flex items-center justify-center space-x-2'>
-            <Icons.Settings2 className='h-5 w-5' />
+            <untitled.Settings02 className='h-5 w-5' />
             <span>Settings</span>
         </div>
     )
@@ -48,7 +48,7 @@ export function SettingsDialog() {
                     <Dialog.DialogTrigger asChild>
                         <Sidebar.SidebarMenuButton asChild>
                             <a href='#'>
-                                <Icons.Settings2 />
+                                <untitled.Settings02 />
                                 <span>Settings</span>
                             </a>
                         </Sidebar.SidebarMenuButton>
@@ -66,7 +66,7 @@ export function SettingsDialog() {
                     <Drawer.DrawerTrigger asChild>
                         <Sidebar.SidebarMenuButton asChild>
                             <a href='#'>
-                                <Icons.Settings2 />
+                                <untitled.Settings02 />
                                 <span>Settings</span>
                             </a>
                         </Sidebar.SidebarMenuButton>

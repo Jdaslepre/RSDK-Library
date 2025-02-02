@@ -6,11 +6,14 @@ import * as React from 'react'
 // UI Component Imports
 // --------------------
 
-import * as Icons from 'lucide-react'
+import * as untitled from '@untitled-ui/icons-react';
 
 import * as Collapsible from 'ui/collapsible'
+import { Button } from 'ui/button'
 import * as Dropdown from 'ui/dropdown-menu'
-import * as Sidebar from 'ui/sidebar'
+import * as Sidebar from '@/components/mod/sidebar'
+
+import { ThemeProvider } from '@/app/controls/theme-provider'
 
 // -------------------------
 // Home UI Component Imports
@@ -36,62 +39,13 @@ export const EngineList = [
     { title: 'RSDKv5U', url: 'rsdkv5u', icon: './assets/RSDKv5U.png' }
 ]
 
-const Resources = [
-    { name: 'Website Source Repository', url: 'https://github.com/Jdsle/RSDK', icon: Icons.Globe },
-    { name: 'RSDKv2 Source Repository', url: 'https://github.com/Jdsle/RSDKv2-Decompilation/tree/web', icon: Icons.Code2 },
-    { name: 'RSDKv3 Source Repository', url: 'https://github.com/Jdsle/RSDKv3-Decompilation/tree/web', icon: Icons.Code2 },
-    { name: 'RSDKv4 Source Repository', url: 'https://github.com/Jdsle/RSDKv4-Decompilation/tree/web', icon: Icons.Code2 },
-    { name: 'RSDKv5 Source Repository', url: 'https://github.com/Jdsle/RSDKv5-Decompilation/tree/web', icon: Icons.Code2 },
-]
-
-interface Props {
-    onNavigate: (path: string) => void
-}
-
-const DropdownHeader = () => (
-    <Dropdown.DropdownMenu>
-        <Dropdown.DropdownMenuTrigger asChild>
-            <Sidebar.SidebarMenuButton className='w-fit px-1.5'>
-                <div className='flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground'>
-                    <img src={`./assets/RSDK.png`} alt='header logo' />
-                </div>
-                <span className='truncate font-semibold'>RSDK Library</span>
-                <Icons.ChevronDown className='opacity-50' />
-            </Sidebar.SidebarMenuButton>
-        </Dropdown.DropdownMenuTrigger>
-        <Dropdown.DropdownMenuContent
-            className='w-64 rounded-lg'
-            align='start'
-            side='bottom'
-            sideOffset={4}
-        >
-            <Dropdown.DropdownMenuLabel className='text-xs text-muted-foreground'>
-                Resources
-            </Dropdown.DropdownMenuLabel>
-            {Resources.map((item, index) => (
-                <Dropdown.DropdownMenuItem
-                    key={item.name}
-                    onClick={() => window.open(item.url, '_blank')}
-                    className='gap-2 p-2'
-                >
-                    <div className='flex size-6 items-center justify-center rounded-sm border'>
-                        <item.icon className='size-4 shrink-0' />
-                    </div>
-                    {item.name}
-                </Dropdown.DropdownMenuItem>
-            ))}
-        </Dropdown.DropdownMenuContent>
-    </Dropdown.DropdownMenu>
-)
-
 const EnginesCollapsible: React.FC<Props> = ({ onNavigate }) => (
     <Collapsible.Collapsible defaultOpen className='group/collapsible'>
         <Sidebar.SidebarGroup>
             <Sidebar.SidebarGroupLabel asChild>
                 <Collapsible.CollapsibleTrigger className='gap-2'>
-                    <Icons.FolderClosed />
                     <span className='truncate font-semibold'>Engine Files</span>
-                    <Icons.ChevronDown className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180' />
+                    <untitled.ChevronDown className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180' />
                 </Collapsible.CollapsibleTrigger>
             </Sidebar.SidebarGroupLabel>
             <Collapsible.CollapsibleContent>
@@ -99,7 +53,7 @@ const EnginesCollapsible: React.FC<Props> = ({ onNavigate }) => (
                     {EngineList.map((item) => (
                         <Sidebar.SidebarMenuItem key={item.title}>
                             <Sidebar.SidebarMenuButton asChild>
-                                <a href='#' onClick={() => onNavigate(item.url)}>
+                                <a onClick={() => onNavigate(item.url)}>
                                     <img src={item.icon} alt='engine logo' width={16} height={16} />
                                     <span>{item.title}</span>
                                 </a>
@@ -112,45 +66,48 @@ const EnginesCollapsible: React.FC<Props> = ({ onNavigate }) => (
     </Collapsible.Collapsible>
 )
 
+interface Props {
+    onNavigate: (path: string) => void
+}
+
 export function AppSidebar({ onNavigate, ...props }: Props) {
-    const isMobile = useIsMobile()
+    const isMobile = useIsMobile();
+    const { toggleSidebar } = Sidebar.useSidebar();
 
     return isMobile ? (
         <></>
     ) : (
-        <Sidebar.Sidebar collapsible='icon' {...props}>
-            <Sidebar.SidebarHeader>
-                <Sidebar.SidebarMenu>
-                    <Sidebar.SidebarMenuItem>
-                        <DropdownHeader />
-                    </Sidebar.SidebarMenuItem>
-                </Sidebar.SidebarMenu>
-            </Sidebar.SidebarHeader>
-            <Sidebar.SidebarContent>
-                <Sidebar.SidebarMenu>
+        <ThemeProvider attribute='class' forcedTheme='dark'>
+            <Sidebar.Sidebar {...props}>
+                <Sidebar.SidebarHeader className='PWA-Title-Draggable w-full h-12 pl-4 shrink-0 border-b'>
+                    <div className="w-full h-full flex items-center gap-2">
+                        <div onClick={toggleSidebar} className='PWA-Title-NonDraggable flex items-center justify-center aspect-square size-6'>
+                            <img src="./assets/Retro.png" alt="header logo" className='PWA-Title-NonDraggable h-full w-full object-contain' />
+                        </div>
+                        <span className="truncate font-semibold">RSDK Library</span>
+                        <Button className='PWA-Title-NonDraggable w-9 h-9 ml-auto flex items-center justify-center' variant='ghost' onClick={() => window.open('https://github.com/Jdsle/RSDK', '_blank')}>
+                            <untitled.Codepen />
+                        </Button>
+                    </div>
+                </Sidebar.SidebarHeader>
+                <Sidebar.SidebarContent>
+                    <Sidebar.SidebarMenu>
+                        {/* Home Item */}
+                        <Sidebar.SidebarGroup>
+                            <Sidebar.SidebarMenuButton onClick={() => onNavigate('home')} asChild>
+                                <a href='#'>
+                                    <untitled.Home02 />
+                                    <span>Home</span>
+                                </a>
+                            </Sidebar.SidebarMenuButton>
+                            <SettingsDialog />
+                        </Sidebar.SidebarGroup>
 
-                    {/* Home Item */}
-                    <Sidebar.SidebarGroup>
-                        <Sidebar.SidebarMenuButton onClick={() => onNavigate('home')} asChild>
-                            <a href='#'>
-                                <Icons.Home />
-                                <span>Home</span>
-                            </a>
-                        </Sidebar.SidebarMenuButton>
-                    </Sidebar.SidebarGroup>
-
-                    <Sidebar.SidebarSeparator />
-
-                    {/* RSDK Engines */}
-                    <EnginesCollapsible onNavigate={onNavigate} />
-
-                    <Sidebar.SidebarSeparator />
-
-                </Sidebar.SidebarMenu>
-            </Sidebar.SidebarContent>
-            <Sidebar.SidebarFooter>
-                <SettingsDialog />
-            </Sidebar.SidebarFooter>
-        </Sidebar.Sidebar>
+                        {/* RSDK Engines */}
+                        <EnginesCollapsible onNavigate={onNavigate} />
+                    </Sidebar.SidebarMenu>
+                </Sidebar.SidebarContent>
+            </Sidebar.Sidebar>
+        </ThemeProvider>
     )
 }

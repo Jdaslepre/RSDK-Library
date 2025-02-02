@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <link rel='manifest' href='./manifest.webmanifest' />
             </head>
             <body className={`min-h-screen bg-background ${GeistSans.className}`}>
-                <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+                <ThemeProvider attribute='class' defaultTheme='dark'>
                     <Splash />
                     <div vaul-drawer-wrapper="">
                         <div className="relative flex min-h-screen flex-col bg-background">

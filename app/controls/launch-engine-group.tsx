@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Icons from 'lucide-react'
+import * as untitled from '@untitled-ui/icons-react';
 
 // --------------------
 // UI Component Imports
@@ -38,7 +38,7 @@ const LaunchEngineGroup: React.FC<Props> = ({ icon, title, launchClicked, filesC
                 onClick={filesClicked}
                 disabled={disabled}
             >
-                <Icons.FolderClosed />
+                <untitled.FolderCode />
             </Button>
         </div>
     );
